@@ -1,0 +1,24 @@
+# ==============================================================================
+# Gongju HLint Configuration
+# https://github.com/ndmitchell/hlint
+#
+# Custom semantic hints and performance guardrails for type-level utilities,
+# Peano induction, arity composition, and positional combinators.
+# ==============================================================================
+
+- arguments:
+    - -XDataKinds
+    - -XTypeOperators
+    - -XTypeApplications
+    - -XPolyKinds
+    - -XScopedTypeVariables
+    - -XFlexibleContexts
+    - -XFlexibleInstances
+    - -XUndecidableInstances
+
+# ------------------------------------------------------------------------------
+# 1. Ignored or adjusted rules
+# ------------------------------------------------------------------------------
+- ignore: {name: "Use camelCase"}
+- ignore: {name: "Reduce duplication"}
+- ignore: {name: "Eta reduce"}

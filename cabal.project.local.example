@@ -1,0 +1,8 @@
+-- Local development overrides for gongju
+-- Copy to cabal.project.local to activate.
+
+-- Optimization tuning
+optimization: 2
+
+-- Documentation building
+documentation: True

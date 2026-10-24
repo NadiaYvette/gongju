@@ -1,0 +1,47 @@
+cabal-version:      3.0
+name:               gongju
+version:            0.1.0.0
+synopsis:           Pure type-level utility functions, arity composition, and curried combinators
+description:
+    Gongju (공구 / 工具, tools/implement) provides inductive Peano type-level
+    utility functions in pure Haskell, replacing Template Haskell arity splices
+    (e.g. composition-extra) and finite tuple generics (e.g. tuple-sop) with
+    zero-overhead typeclass induction, bidirectional functional dependencies,
+    and TypeApplications-friendly GHC.TypeLits.Nat wrappers.
+
+license:            EUPL-1.2 OR Apache-2.0
+license-files:      LICENSE
+author:             Nadia Yvette Chambers
+maintainer:         nadia.yvette.chambers@ik.me
+category:           Types, Functional, Combinators
+build-type:         Simple
+
+common commons
+    default-language:   Haskell2010
+    ghc-options:
+        -Wall
+        -Wcompat
+        -Wredundant-constraints
+
+library
+    import:             commons
+    hs-source-dirs:     src
+    exposed-modules:
+        Gongju.Core
+        Gongju.Peano
+        Gongju.Composition
+        Gongju.Positional
+        Gongju.Permute
+        Gongju.HList
+    build-depends:
+        base >= 4.18 && < 5
+
+test-suite gongju-test
+    import:             commons
+    type:               exitcode-stdio-1.0
+    hs-source-dirs:     test
+    main-is:            Main.hs
+    build-depends:
+        base >= 4.18 && < 5
+      , gongju
+      , hspec >= 2.11

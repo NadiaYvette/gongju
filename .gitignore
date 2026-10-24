@@ -1,0 +1,29 @@
+# Build artifacts and compiler outputs
+dist-newstyle/
+.ghc.environment.*
+*.o
+*.hi
+*.dyn_o
+*.dyn_hi
+*.prof
+*.dump-*
+
+# Project navigation and tags
+tags
+TAGS
+.hie/
+
+# Editor and temporary files
+*~
+*.swp
+*.swo
+.DS_Store
+
+# Index databases and sqlite journals
+.ok/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+
+# Local cabal overrides
+cabal.project.local

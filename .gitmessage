@@ -1,0 +1,10 @@
+# <type>(<scope>): <imperative summary under 72 chars>
+#
+# Explain WHY this change was made, not just what was changed.
+# Keep lines under 72 characters.
+#
+# Trailers (RFC 2822):
+# Assisted-by: Antigravity (Google / gemini-3.8-pro)
+# Assisted-by: Claude (Anthropic / claude-3-5-sonnet)
+#
+# NOTE: Never use Co-authored-by or Signed-off-by for AI assistants.
