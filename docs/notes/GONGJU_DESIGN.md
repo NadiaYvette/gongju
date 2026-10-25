@@ -41,9 +41,9 @@ Historically, Haskell developers seeking multi-argument function manipulation fa
 - **Rationale:** Supports functions of arbitrary arities, handles duplicate argument types without ambiguity, and permits partial permutations where unspecified arguments retain their original relative order.
 - **Reference:** Note [Iterated Yank Index Adjustment] `[ref:note-iterated-yank-adjustment]`.
 
-### D5: First-Class Argument Bundling via HList Isomorphism
-- **Decision:** The 'CurryH' class establishes a bidirectional isomorphism between curried functions and uncurried functions taking 'HList xs' argument bundles.
-- **Rationale:** Allows callers to apply heterogeneous list transformations before re-currying into standard function form.
+### D5: Grand Unified Open-World Tape Engine
+- **Decision:** Multi-layer functor and monad/comonad composition is modeled as an open-world tape machine using `StepPathMask`, `StepRole`, and open layer/mode tags (`F`, `C`, `B1`, `B2`, `BB`, `P1`, `P2`, `IxF`, `Dist`, `PP`, `PZ`, `PL`, `PM`, `J`, `CS`, `SwapAt`, `PullRet`, `PIM`, `IJ`, `PIxW`, `IxDup`, `IxEx`, `PW`, `PWL`, `Dup`, `Ex`) evaluated via visible-forall entry points (`composeUnifiedV`, `withOps`, `(.@)`).
+- **Rationale:** Eliminates closed `HList` isomorphisms in favor of zero-orphan open-world execution over curried functions, supporting generalized effects including standard functors/monads, indexed state/monads (`Gongju.Indexed`), and comonadic/distributive effects (`Gongju.Comonad`).
 
 ### D6: Zero-Warning Compiler Verification
 - **Decision:** Every package in `gongju` compiles under `-Wall -Wcompat -Wredundant-constraints` and clean HLint hints.

@@ -73,10 +73,12 @@ class Permute (ps :: [Peano]) f g | ps f -> g where
 
 instance Permute '[] f f where
   permute' = id
+  {-# INLINE permute' #-}
 
 instance (Yank p f arg rest, Permute (MapAdjust p ps) rest rest')
-      => Permute (p ': ps) f (arg -> rest') where
+  => Permute (p ': ps) f (arg -> rest') where
   permute' f arg = permute' @(MapAdjust p ps) (yank' @p f arg)
+  {-# INLINE permute' #-}
 
 -- | Reorder the arguments of a curried function according to a 0-indexed list of 'Nat' positions.
 --
@@ -87,3 +89,4 @@ instance (Yank p f arg rest, Permute (MapAdjust p ps) rest rest')
 -- (1, 2, 3)
 permute :: forall (ns :: [Nat]) f g. Permute (MapToPeano ns) f g => f -> g
 permute = permute' @(MapToPeano ns)
+{-# INLINE permute #-}

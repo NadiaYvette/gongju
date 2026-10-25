@@ -1,23 +1,72 @@
 {-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE RequiredTypeArguments #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeFamilies #-}
 
 module Main (main) where
 
 import Test.Hspec
 import Gongju.Core
 
+-- Simple Test Comonad
+data IdW a = IdW a
+  deriving (Eq, Show)
+
+instance Functor IdW where
+  fmap f (IdW a) = IdW (f a)
+
+instance Comonad IdW where
+  extract (IdW a) = a
+  duplicate (IdW a) = IdW (IdW a)
+
+-- Simple Test Distributive / Representable Functor (Reader r a)
+newtype ReaderR r a = ReaderR { runReaderR :: r -> a }
+
+instance Functor (ReaderR r) where
+  fmap f (ReaderR g) = ReaderR (f . g)
+
+instance Distributive (ReaderR r) where
+  distribute f = ReaderR \r -> fmap (\(ReaderR g) -> g r) f
+
+instance Representable (ReaderR r) where
+  type Rep (ReaderR r) = r
+  tabulate = ReaderR
+  index (ReaderR f) = f
+
+-- Simple Test Indexed Monad: Indexed State
+newtype IxState i j a = IxState { runIxState :: i -> (a, j) }
+
+instance IxFunctor IxState where
+  imap f (IxState g) = IxState \i ->
+    let (a, j) = g i in (f a, j)
+
+instance IxApplicative IxState where
+  ipure a = IxState \i -> (a, i)
+  iap (IxState gf) (IxState ga) = IxState \i ->
+    let (f, j) = gf i
+        (a, l) = ga j
+    in (f a, l)
+
+instance IxMonad IxState where
+  ibind (IxState g) k = IxState \i ->
+    let (a, j) = g i
+    in runIxState (k a) j
+
 main :: IO ()
 main = hspec do
   -- Tested against Note [Peano TypeLits Bridge] [ref:note-peano-typelits-bridge]
-  describe "Gongju.Peano Naturals" do
+  describe "Gongju.Peano Naturals & List Type Families" do
     it "converts numeric TypeLits to Peano and verifies term equality" do
       show (Z :: Peano) `shouldBe` "Z"
       show (S Z :: Peano) `shouldBe` "S Z"
 
   -- Tested against Note [Variadic Composition Bidirectional Fundeps] [ref:note-variadic-composition-fundeps]
-  describe "Gongju.Composition Variadic Composition" do
+  describe "Gongju.Composition Variadic Composition & Tape Engine" do
     it "compN @1 behaves identically to standard function composition (.)" do
       let f = (+ 1) :: Int -> Int
           g = (* 2) :: Int -> Int
@@ -36,6 +85,22 @@ main = hspec do
     it "fmapN @2 maps through a nested functor layer" do
       let nested = Just [1, 2, 3 :: Int]
       fmapN @2 (+ 10) nested `shouldBe` Just [11, 12, 13]
+
+    it "executes tape-driven composition via infix (.@) on pure arguments" do
+      let add3 x y z = (x + y + z :: Int)
+          h = ((+ 100) .@ [P, P, P]) add3
+      h 10 20 30 `shouldBe` 160
+
+    it "executes tape-driven composition with explicit argument indices" do
+      let tuple3 x y z = (x, y, z) :: (Int, String, Bool)
+          p = (id .@ [2 # P, 0 # P, 1 # P]) tuple3
+      p True (42 :: Int) "gongju" `shouldBe` (42, "gongju", True)
+
+    it "executes tape-driven monadic binding" do
+      let mAction :: Int -> Int -> [Int]
+          mAction x y = [x + y, x * y]
+          mComp = (fmap show .@ [P, M]) mAction
+      mComp 3 [10, 20 :: Int] `shouldBe` ["[13,30]", "[23,60]"]
 
   -- Tested against Note [Positional Curried Arrow Manipulation] [ref:note-positional-arrow-manipulation]
   describe "Gongju.Positional Combinators" do
@@ -65,11 +130,24 @@ main = hspec do
       let f x y z = (x - y + z :: Int)
       permute @'[1, 2, 0] f 20 30 10 `shouldBe` (10 - 20 + 30)
 
-  describe "Gongju.HList Heterogeneous Argument Bundles" do
-    it "curries and uncurries functions over HList bundles" do
-      let f :: HList '[Int, Int] -> Int
-          f (x :> y :> HNil) = x + y
-          curried :: Int -> Int -> Int
-          curried = curryH f
-      curried 10 25 `shouldBe` 35
-      uncurryH curried ((10 :: Int) :> (25 :: Int) :> HNil) `shouldBe` 35
+  describe "Gongju.Indexed Transitions" do
+    it "composes transitions over indexed state monad" do
+      let step1 :: Int -> Int -> String
+          step1 x y = show (x + y)
+          comp = (imap (++ "!") .@ [P, IxM]) step1
+          res = comp 10 (IxState \s -> (5 :: Int, s + 1))
+      runIxState res (0 :: Int) `shouldBe` ("15!", 1 :: Int)
+
+  describe "Gongju.Comonad & Distributive Functors" do
+    it "extends cokleisli functions using W tag" do
+      let wAction :: IdW Int -> Int -> String
+          wAction (IdW x) y = show (x + y)
+          wComp = (fmap (++ "!") .@ [W, P]) wAction
+      wComp (IdW 5) (10 :: Int) `shouldBe` IdW "15!"
+
+    it "commutes a Representable effect outside a Comonad via PullRet '[Dist]" do
+      let g :: IdW Int -> Int -> ReaderR String Int
+          g (IdW baseVal) multiplier = ReaderR \env -> (baseVal + multiplier) * length env
+          comp = withOps [W, P, PullDist] id g
+          readerRes = comp (IdW 10) (5 :: Int)
+      runReaderR readerRes "abc" `shouldBe` IdW 45

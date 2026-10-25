@@ -32,7 +32,8 @@ library
         Gongju.Composition
         Gongju.Positional
         Gongju.Permute
-        Gongju.HList
+        Gongju.Indexed
+        Gongju.Comonad
     build-depends:
         base >= 4.18 && < 5
 

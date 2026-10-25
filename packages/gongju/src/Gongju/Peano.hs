@@ -7,14 +7,18 @@
 {-# LANGUAGE UndecidableInstances #-}
 
 -- | Module: Gongju.Peano
--- Description: Bridge between GHC.TypeLits.Nat and inductive Peano data kinds
+-- Description: Bridge between GHC.TypeLits.Nat, inductive Peano data kinds, and type-level list utilities
 --
 -- Provides inductive Peano naturals for driving typeclass induction while exposing
--- ergonomic 'GHC.TypeLits.Nat' type application interfaces.
+-- ergonomic 'GHC.TypeLits.Nat' type application interfaces, as well as fundamental
+-- inductive type-level list operations ('Append', 'Init', 'Replicate').
 module Gongju.Peano
   ( Peano(..)
   , ToPeano
   , FromPeano
+  , Append
+  , Init
+  , Replicate
   ) where
 
 import GHC.TypeLits (Nat, type (-), type (+))
@@ -52,3 +56,19 @@ type family ToPeano (n :: Nat) :: Peano where
 type family FromPeano (p :: Peano) :: Nat where
   FromPeano 'Z     = 0
   FromPeano ('S p) = 1 + FromPeano p
+
+-- | Concatenate two type-level lists.
+type family Append (xs :: [k]) (ys :: [k]) :: [k] where
+  Append '[]       ys = ys
+  Append (x ': xs) ys = x ': Append xs ys
+
+-- | Return all elements of a type-level list except the last element.
+type family Init (xs :: [k]) :: [k] where
+  Init '[]       = '[]
+  Init '[_]      = '[]
+  Init (x ': xs) = x ': Init xs
+
+-- | Generate a type-level list containing @n@ copies of element @x@.
+type family Replicate (n :: Nat) (x :: k) :: [k] where
+  Replicate 0 _ = '[]
+  Replicate n x = x ': Replicate (n - 1) x

@@ -12,7 +12,7 @@
 2. **Variadic Arity Composition:** Composing unary functions with $n$-ary curried functions with bidirectional functional dependencies (`compN @n`, `fmapN @n`).
 3. **Positional Combinators:** Pulling arguments to the front (`slipr @n`), pushing them deeper (`slipl @n`), and swapping adjacent arguments (`twist @n`) directly on curried function arrows without heap allocations.
 4. **Arbitrary Argument Permutation:** Reordering curried function arguments via positional index lists (`permute @'[2, 0, 1]`) with support for duplicate argument types and partial permutations.
-5. **Heterogeneous Argument Bundling:** Isomorphism between curried functions and uncurried `HList` arguments via `curryH` and `uncurryH`.
+5. **Grand Unified Tape Engine:** Open-world composition over pure and monadic/comonadic effects using visible-forall `(.@)` and `withOps`.
 
 ---
 
@@ -33,6 +33,10 @@ main = do
   -- 2. Permuting arguments of a function:
   let f x y z = (x, y, z)
   print (permute @'[2, 0, 1] f True 10 "gongju") -- Prints (10, "gongju", True)
+
+  -- 3. Tape-driven composition:
+  let comp = ((+ 1) .@ [P, P]) (+)
+  print (comp 5 10) -- Prints 16
 ```
 
 ---

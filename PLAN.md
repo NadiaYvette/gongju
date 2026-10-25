@@ -18,13 +18,14 @@
 - [x] **Milestone 1.3:** Positional Curried Arrow Manipulation (`Gongju.Positional`)
   - `Yank` / `slipr @n`, `Shove` / `slipl @n`, `Twist` / `twist @n`.
   - Grounded Note [Positional Curried Arrow Manipulation] `[ref:note-positional-arrow-manipulation]`.
-- [x] **Milestone 1.4:** Arbitrary Permutations & Heterogeneous Bundling (`Gongju.Permute`, `Gongju.HList`)
+- [x] **Milestone 1.4:** Arbitrary Permutations & Grand Unified Tape Engine (`Gongju.Permute`, `Gongju.Composition`, `Gongju.Indexed`, `Gongju.Comonad`)
   - `Permute` / `permute @ns` via iterated `Yank` and `Adjust`.
-  - `HList`, `curryH`, `uncurryH`, `ArgsOf`, `ResultOf`.
+  - Open-world tape execution via `StepPathMask`, `StepRole`, visible `(.@)`, and `withOps`.
+  - Indexed effects (`IxFunctor`, `IxApplicative`, `IxMonad`, `IxComonad`) and comonad/distributive commutation.
   - Grounded Note [Iterated Yank Index Adjustment] `[ref:note-iterated-yank-adjustment]`.
 - [x] **Milestone 1.5:** Turnkey Verification Suite
   - 5-gate physical verification harness (`bin/gongju-verify`).
-  - Hspec test suite passing 12/12 specifications.
+  - Hspec test suite passing 17/17 specifications.
 
 ---
 

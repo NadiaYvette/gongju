@@ -28,7 +28,8 @@ Level 2: Targeted Slice     (view_file StartLine / EndLine)       →   ~200–5
 | `compN`, `ComposeN`, `fmapN`, `FmapN` | `Gongju.Composition` | `packages/gongju/src/Gongju/Composition.hs` |
 | `slipr`, `Yank`, `slipl`, `Shove`, `twist`, `Twist` | `Gongju.Positional` | `packages/gongju/src/Gongju/Positional.hs` |
 | `permute`, `Permute`, `Adjust`, `MapAdjust` | `Gongju.Permute` | `packages/gongju/src/Gongju/Permute.hs` |
-| `HList`, `(:>)`, `curryH`, `uncurryH`, `ArgsOf` | `Gongju.HList` | `packages/gongju/src/Gongju/HList.hs` |
+| `IxFunctor`, `IxApplicative`, `IxMonad`, `IxComonad` | `Gongju.Indexed` | `packages/gongju/src/Gongju/Indexed.hs` |
+| `Comonad`, `Distributive`, `Representable` | `Gongju.Comonad` | `packages/gongju/src/Gongju/Comonad.hs` |
 | Top-level re-exports | `Gongju.Core` | `packages/gongju/src/Gongju/Core.hs` |
 | Unit tests & properties | `Main` (Test) | `packages/gongju/test/Main.hs` |
 

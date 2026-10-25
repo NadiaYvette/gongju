@@ -1,4 +1,5 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -6,17 +7,23 @@
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE UndecidableSuperClasses #-}
 
 -- | Module: Gongju.Positional
--- Description: Positional argument combinators (Yank, Shove, Twist) on curried functions
+-- Description: Guarded arrow unification and positional combinators (Yank, Shove, Twist)
 --
 -- Provides inductive combinators for manipulating curried function arguments by position:
 -- pulling arguments to the front (Yank), pushing arguments deeper (Shove), and swapping
--- adjacent arguments (Twist).
+-- adjacent arguments (Twist), accompanied by guarded error messages for arity mismatches.
 module Gongju.Positional
-  ( -- * Yank (Pull to Front)
-    Yank(..)
+  ( -- * Guarded Arrow Unification
+    CheckArrow
+  , ExpectArrow
+    -- * Yank (Pull to Front)
+  , Yank(..)
   , slipr
     -- * Shove (Push Deeper)
   , Shove(..)
@@ -26,7 +33,13 @@ module Gongju.Positional
   , twist
   ) where
 
-import GHC.TypeLits (Nat)
+import Data.Kind (Constraint, Type)
+import GHC.TypeLits
+  ( ErrorMessage (ShowType, Text, (:$$:), (:<>:))
+  , Nat
+  , Symbol
+  , TypeError
+  )
 import Gongju.Peano (Peano(..), ToPeano)
 
 {- Note [Positional Curried Arrow Manipulation]
@@ -45,26 +58,46 @@ primitives:
   2. 'Shove' ('slipl'): Pushes argument 0 into depth n, shifting intervening arguments
      [1 .. n] one slot to the left.
   3. 'Twist' ('twist'): Transposes adjacent arguments at depth n and n+1.
+
+Furthermore, 'CheckArrow' and 'ExpectArrow' provide compile-time guard rails that report
+clear, descriptive custom type errors when arity boundaries are exceeded.
 -}
+
+-- | Guard family asserting that type @f@ is a function arrow @(a -> b)@.
+type family CheckArrow (ctx :: Symbol) (f :: Type) :: Constraint where
+  CheckArrow _ (_ -> _) = ()
+  CheckArrow ctx nonFn =
+    TypeError
+      ( 'Text "• [" :<>: 'Text ctx :<>: 'Text "] Arity / Index Mismatch:"
+      ':$$: 'Text "  Expected a function (a -> r), but reached: " :<>: 'ShowType nonFn
+      )
+
+-- | Constraint requiring @f@ to unify with @(a -> r)@ with diagnostic context @ctx@.
+class (CheckArrow ctx f, f ~ (a -> r)) => ExpectArrow (ctx :: Symbol) f a r
+instance (CheckArrow ctx f, f ~ (a -> r)) => ExpectArrow ctx f a r
 
 -- | Pull the @n@-th curried argument (0-indexed) to the front position.
 --
 -- See Note [Positional Curried Arrow Manipulation] [ref:note-positional-arrow-manipulation].
-class Yank (n :: Peano) f target rest | n f -> target rest, n target rest -> f where
+class Yank (n :: Peano) f target rest | n f -> target rest where
   -- | Internal worker for pulling the @n@-th argument forward.
-  yank' :: f -> (target -> rest)
+  yank' :: f -> target -> rest
 
-instance Yank 'Z (a -> r) a r where
-  yank' = id
+instance ExpectArrow "Yank" (a -> r) a r => Yank 'Z (a -> r) a r where
+  yank' f target = f target
+  {-# INLINE yank' #-}
 
-instance Yank n r target rest => Yank ('S n) (a -> r) target (a -> rest) where
+instance (ExpectArrow "Yank" (a -> r) a r, Yank n r target rest')
+  => Yank ('S n) (a -> r) target (a -> rest') where
   yank' f target a = yank' @n (f a) target
+  {-# INLINE yank' #-}
 
 -- | Pull the @n@-th argument (0-indexed) to position 0.
 --
 -- Equivalent to @slipr@ in 'composition-extra'.
 slipr :: forall (n :: Nat) f target rest. Yank (ToPeano n) f target rest => f -> target -> rest
 slipr = yank' @(ToPeano n)
+{-# INLINE slipr #-}
 
 -- | Push the 0-th argument into position @n@, shifting arguments 1 through @n@ to the left.
 class Shove (n :: Peano) a rest f | n a rest -> f, n f -> a rest where
@@ -73,15 +106,18 @@ class Shove (n :: Peano) a rest f | n a rest -> f, n f -> a rest where
 
 instance Shove 'Z a r (a -> r) where
   shove' = id
+  {-# INLINE shove' #-}
 
 instance Shove n a rest r => Shove ('S n) a (b -> rest) (b -> r) where
   shove' f b = shove' @n (`f` b)
+  {-# INLINE shove' #-}
 
 -- | Push the 0-th argument into position @n@.
 --
 -- Equivalent to @slipl@ in 'composition-extra'.
 slipl :: forall (n :: Nat) a rest f. Shove (ToPeano n) a rest f => (a -> rest) -> f
 slipl = shove' @(ToPeano n)
+{-# INLINE slipl #-}
 
 -- | Swap adjacent arguments at depth @n@ and @n + 1@.
 class Twist (n :: Peano) f g | n f -> g, n g -> f where
@@ -90,10 +126,13 @@ class Twist (n :: Peano) f g | n f -> g, n g -> f where
 
 instance Twist 'Z (a -> b -> r) (b -> a -> r) where
   twist' = flip
+  {-# INLINE twist' #-}
 
 instance Twist n r r' => Twist ('S n) (a -> r) (a -> r') where
   twist' f a = twist' @n (f a)
+  {-# INLINE twist' #-}
 
 -- | Swap adjacent arguments at depth @n@ and @n + 1@.
 twist :: forall (n :: Nat) f g. Twist (ToPeano n) f g => f -> g
 twist = twist' @(ToPeano n)
+{-# INLINE twist #-}
