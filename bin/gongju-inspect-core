@@ -16,30 +16,47 @@ INSPECTION_SRC="${REPO_ROOT}/packages/gongju/test/CoreInspection.hs"
 TMP_DIR="$(mktemp -d /tmp/gongju-core-inspect.XXXXXX)"
 trap 'rm -rf "${TMP_DIR}"' EXIT
 
-# Determine GHC binary
-GHC_CMD=""
-if [[ -x "${HOME}/.ghcup/bin/ghc-9.14.1" ]]; then
-  GHC_CMD="${HOME}/.ghcup/bin/ghc-9.14.1"
-elif command -v ghc >/dev/null 2>&1; then
-  GHC_CMD="$(command -v ghc)"
-fi
-
-if [[ -z "${GHC_CMD}" ]]; then
-  echo "[-] ERROR: GHC compiler not found in PATH." >&2
-  exit 1
-fi
-
 CORE_DUMP="${TMP_DIR}/CoreInspection.dump-simpl"
 
 # Compile with -O2 and capture simplified Core
-(cd "${REPO_ROOT}" && "${GHC_CMD}" -O2 -ddump-simpl -dsuppress-all -dsuppress-uniques -fforce-recomp \
-  -c "${INSPECTION_SRC}" \
-  -dumpdir "${TMP_DIR}" \
-  -outputdir "${TMP_DIR}" > "${CORE_DUMP}" 2>&1) || {
-    echo "[-] ERROR: Failed to compile CoreInspection.hs under -O2:" >&2
+compile_inspection() {
+  # Try cabal exec -- ghc first (resolves dist-newstyle package store in CI or isolated checkouts)
+  if command -v cabal >/dev/null 2>&1; then
+    if (cd "${REPO_ROOT}" && cabal exec -- ghc -O2 -ddump-simpl -dsuppress-all -dsuppress-uniques -fforce-recomp \
+        -c "${INSPECTION_SRC}" \
+        -dumpdir "${TMP_DIR}" \
+        -outputdir "${TMP_DIR}" > "${CORE_DUMP}" 2>&1); then
+      return 0
+    fi
+  fi
+
+  # Fallback to direct GHC compiler in PATH or ghcup
+  local ghc_bin=""
+  if [[ -x "${HOME}/.ghcup/bin/ghc-9.14.1" ]]; then
+    ghc_bin="${HOME}/.ghcup/bin/ghc-9.14.1"
+  elif command -v ghc >/dev/null 2>&1; then
+    ghc_bin="$(command -v ghc)"
+  fi
+
+  if [[ -n "${ghc_bin}" ]]; then
+    if (cd "${REPO_ROOT}" && "${ghc_bin}" -O2 -ddump-simpl -dsuppress-all -dsuppress-uniques -fforce-recomp \
+        -c "${INSPECTION_SRC}" \
+        -dumpdir "${TMP_DIR}" \
+        -outputdir "${TMP_DIR}" > "${CORE_DUMP}" 2>&1); then
+      return 0
+    fi
+  fi
+
+  echo "[-] ERROR: Failed to compile CoreInspection.hs under -O2:" >&2
+  if [[ -f "${CORE_DUMP}" ]]; then
     cat "${CORE_DUMP}" >&2
-    exit 1
+  else
+    echo "[-] No GHC compiler or cabal executable found in PATH." >&2
+  fi
+  exit 1
 }
+
+compile_inspection
 
 # 1. Dictionary Check: Ensure NO Gongju typeclass dictionaries exist in Core
 FORBIDDEN_DICTS=(

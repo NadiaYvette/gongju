@@ -183,8 +183,18 @@ def check_file_links(file_path, anchors_cache, repo_root):
             else:
                 target_abs = os.path.normpath(os.path.join(os.path.dirname(file_path), path_part))
 
+            # Determine whether the target path lies inside the repository corpus
+            try:
+                is_intra_corpus = os.path.commonpath([repo_root, target_abs]) == repo_root
+            except ValueError:
+                is_intra_corpus = False
+
             # Verify target file exists
             if not os.path.exists(target_abs):
+                if not is_intra_corpus:
+                    # Target is outside the repository (extra-corpus reference to parent workspace).
+                    # In an isolated CI checkout or standalone clone, parent workspace files are absent.
+                    continue
                 rel_target = os.path.relpath(target_abs, repo_root) if target_abs.startswith(repo_root) else target_abs
                 broken.append((line_idx, raw_target, f"Target file '{rel_target}' does not exist"))
                 continue
