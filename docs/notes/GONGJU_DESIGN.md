@@ -67,6 +67,10 @@ Historically, Haskell developers seeking multi-argument function manipulation fa
 - **Decision:** Interior and trailing monadic binds collapse into a two-phase induction pipeline ('BindAfter' floating trailing pure arguments outside '(>>=)' and 'BindPos' skipping leading arguments) accompanied by arbitrary multi-slot boolean lifting masks ('LiftMask') and arity Kleisli composition ('bindKleisliN').
 - **Rationale:** Replaces hundreds of fixed Template Haskell monadic operators ('Control.Monad.Syntax.Two' through '.Six') with two typeclasses maintaining bidirectional functional dependencies. 'LiftMask' allows arbitrary combinations of pure and monadic parameters in a single pass without intermediate tuple packaging.
 
+### D10: Curried Category & Tuple-Spine Profunctor Permutations
+- **Decision:** Profunctor effect handler permutations decouple into curried environment parameter permutations ('permuteHandler' via 'Permute'), point-free curried category spine reordering ('CurriedCat', 'yankCat', 'permuteCat'), and right-nested tuple spine arrow permutations ('YankTuple', 'PermuteTuple', 'permuteInputs', 'permuteOutputs', 'dimapPermute').
+- **Rationale:** Supports arrow and profunctor effect frameworks (such as 'kernmantle-polytropos') where strands consume multi-argument inputs structured as nested tuples or where effect handlers take curried configuration parameters, eliminating intermediate constructor allocations and runtime dictionary overhead.
+
 ---
 
 ## 3. Grounded Notes Architecture
@@ -95,4 +99,10 @@ Historically, Haskell developers seeking multi-argument function manipulation fa
 - **Note [Multi-Slot Monadic Lifting Masks]** (`Gongju.Monad`):  
   [ref:note-multislot-monadic-masks]  
   Formalizes multi-slot argument lifting masks ('LiftMask', 'ArgMode') transforming any arbitrary subset of curried arguments into monadic inputs in a single pass.
+- **Note [Profunctor Effect Handler Permutations]** (`Gongju.Profunctor`):  
+  [ref:note-profunctor-handler-permutations]  
+  Formalizes curried category spine generalization ('CurriedCat', 'yankCat', 'permuteCat') and environment parameter permutation ('permuteHandler', 'compHandlerN') for profunctor effect handlers.
+- **Note [Tuple-Spine Arrow Permutations]** (`Gongju.Profunctor`):  
+  [ref:note-tuple-spine-permutations]  
+  Formalizes structural induction ('YankTuple', 'PermuteTuple') and profunctor input/output spine permutations ('permuteInputs', 'permuteOutputs', 'dimapPermute') over right-nested arrow tuples.
 

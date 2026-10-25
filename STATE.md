@@ -17,6 +17,6 @@ The core package `packages/gongju` is implemented with pure type-level Peano uti
 - **Git Governance**: `.githooks/commit-msg` enforcing Sarutahiko RFC 2822 commit trailer rules; `.githooks/pre-commit` guarding Tagref and link consistency.
 
 ### Active Frontier
-- **Monadic Curried Binding (Milestone 2.2):** Implemented `Gongju.Monad` providing two-phase positional monadic binding (`BindAfter`, `BindPos`, `bindPos`, `bindAt`), tail binds (`(==<<)`, `(===<<)`, `(====<<)`, `(>>==)`, `(>>===)`, `(>>====)`), interior binds (`(=.=<<)`, `(==.<<)`, `(=..<<)`, `(>>=.=)`, `(>>.==)`, `(>>..=)`), multi-slot monadic lifting masks (`LiftMask`, `liftMask`, `ArgMode(Pure, Monadic)`), and arity-indexed Kleisli composition (`liftPureN`, `bindKleisliN`, `(<=<.)`, `(<=<..)`, `(.>=>)`, `(..>=>)`).
-- **Testing Status:** 49/49 tests passing under Hspec across all 11 modules.
-- **Verification Status:** All 5 physical verification gates (`bin/gongju-verify`) passing cleanly with 0 warnings, 0 hints, 0 dangling tagref references, and 29.5% comment density (production src: 32.2%).
+- **Profunctor Effect Handler Permutations (Milestone 3.1):** Extended `Gongju.Profunctor` with curried category spine generalization (`CurriedCat`, `ComposeCatN`, `compCatN`, `YankCat`, `yankCat`, `PermuteCat`, `permuteCat`), right-nested tuple spine arrow permutations (`YankTuple`, `yankTuple`, `PermuteTuple`, `permuteTuple`), profunctor strand input/output reordering (`permuteInputs`, `permuteOutputs`, `dimapPermute`, `swapStrand`), and curried effect handler environment reordering (`permuteHandler`, `compHandlerN`).
+- **Testing Status:** 61/61 tests passing under Hspec across all 11 modules.
+- **Verification Status:** All 5 physical verification gates (`bin/gongju-verify`) passing cleanly with 0 warnings, 0 hints, 0 dangling tagref references, and 30.3% comment density (production src: 33.5%).

@@ -50,8 +50,13 @@
 ---
 
 ## Phase 3: Integration with Polytropos & Kernmantle Ropes
-
-- [ ] **Milestone 3.1:** Profunctor Effect Handler Permutations
-  - Permuting argument orders for binary profunctor strands in `kernmantle-polytropos`.
+ 
+- [x] **Milestone 3.1:** Profunctor Effect Handler Permutations (`Gongju.Profunctor`)
+  - Curried category spine generalization: `CurriedCat` (`catFlip`, `catApply`), `ComposeCatN`, `compCatN`, `YankCat`, `yankCat`, `PermuteCat`, `permuteCat`.
+  - Right-nested tuple spine arrow permutations: `YankTuple`, `yankTuple`, `PermuteTuple`, `permuteTuple`.
+  - Binary profunctor strand input/output reordering: `permuteInputs`, `permuteOutputs`, `dimapPermute`, `swapStrand`.
+  - Curried effect handler environment reordering and adapter composition: `permuteHandler`, `compHandlerN`.
+  - Grounded Note [Profunctor Effect Handler Permutations] `[ref:note-profunctor-handler-permutations]`.
+  - Grounded Note [Tuple-Spine Arrow Permutations] `[ref:note-tuple-spine-permutations]`.
 - [ ] **Milestone 3.2:** Zero-Cost GHC Core Inspection
   - Verify that GHC Core simplifies `permute` and `compN` into direct inlined lambda applications with zero runtime dictionary dispatch.

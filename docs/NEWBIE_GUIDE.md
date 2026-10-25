@@ -32,7 +32,7 @@ Level 2: Targeted Slice     (view_file StartLine / EndLine)       →   ~200–5
 | `Comonad`, `Distributive`, `Representable` | `Gongju.Comonad` | `packages/gongju/src/Gongju/Comonad.hs` |
 | `Adjunction`, `zapLR`, `zapRL`, `AdjU`, `AdjC` | `Gongju.Adjunction` | `packages/gongju/src/Gongju/Adjunction.hs` |
 | `Ran`, `Lan`, `Yoneda`, `Coyoneda`, `Codensity`, `Density` | `Gongju.Kan` | `packages/gongju/src/Gongju/Kan.hs` |
-| `Profunctor`, `IxProfunctor`, `dimap`, `P1`, `P2`, `PP1`, `PP2` | `Gongju.Profunctor` | `packages/gongju/src/Gongju/Profunctor.hs` |
+| `Profunctor`, `dimap`, `CurriedCat`, `yankTuple`, `permuteTuple`, `permuteInputs`, `permuteHandler` | `Gongju.Profunctor` | `packages/gongju/src/Gongju/Profunctor.hs` |
 | `precomposeAt`, `spliceAt`, `contramapN`, `(-.)`, `(<-$>)` | `Gongju.Contravariant` | `packages/gongju/src/Gongju/Contravariant.hs` |
 | `bindPos`, `bindAt`, `liftMask`, `liftPureN`, `(==<<)`, `(=.=<<)` | `Gongju.Monad` | `packages/gongju/src/Gongju/Monad.hs` |
 | Top-level re-exports | `Gongju.Core` | `packages/gongju/src/Gongju/Core.hs` |

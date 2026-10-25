@@ -314,6 +314,47 @@ let g3 = dimap (* 2) show f
 g3 5 -- ==> "20"
 ```
 
+### Curried Category Permutations (`CurriedCat`, `permuteCat`)
+
+Permute curried functions point-free over any `CurriedCat cat` (such as `(->)`):
+
+```haskell
+let tuple3 x y z = (x, y, z) :: (Int, String, Bool)
+
+-- Permute curried inputs to index order [2, 0, 1]:
+let perm = permuteCat @'[2, 0, 1] tuple3
+perm False 100 "hello" -- ==> (100, "hello", False)
+```
+
+See Note [Profunctor Effect Handler Permutations] [ref:note-profunctor-handler-permutations].
+
+### Tuple-Spine Arrow & Strand Permutations (`permuteInputs`, `permuteTuple`)
+
+In arrow architectures (such as `kernmantle-polytropos`), multi-argument binary profunctor strands consume right-nested tuples: `(a0, (a1, (a2, ())))`.
+`permuteInputs` reorders these input slots at compile-time:
+
+```haskell
+let strand = \(z, (x, (y, ()))) -> show (x * 100 + y * 10 + z :: Int)
+
+-- Permute input slots [2, 0, 1]:
+let strand' = permuteInputs @'[2, 0, 1] strand
+strand' (1, (2, (3, ()))) -- ==> "123"
+```
+
+See Note [Tuple-Spine Arrow Permutations] [ref:note-tuple-spine-permutations].
+
+### Curried Effect Handler Permutations (`permuteHandler`, `compHandlerN`)
+
+When effect handlers take curried configuration/environment parameters before returning or interpreting a strand (`handler :: env1 -> env2 -> env3 -> p a b`):
+
+```haskell
+let handler env1 env2 env3 = \(x :: Int) -> env1 ++ ":" ++ show env2 ++ ":" ++ env3 ++ ":" ++ show x
+
+-- Reorder handler parameters:
+let handler' = permuteHandler @'[2, 0, 1] handler
+handler' "c" "a" 42 10 -- ==> "a:42:c:10"
+```
+
 ---
 
 ## 11. Positional Monadic Binding & Lifting Masks (`Gongju.Monad`)

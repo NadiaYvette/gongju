@@ -5,6 +5,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE RequiredTypeArguments #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
@@ -403,6 +404,72 @@ main = hspec do
       (checkEven <=<.. add3M) 1 2 4 `shouldBe` Nothing
       (add3M ..>=> checkEven) 1 2 3 `shouldBe` Just 6
       (add3M ..>=> checkEven) 1 2 4 `shouldBe` Nothing
+
+  -- Tested against Note [Profunctor Effect Handler Permutations] [ref:note-profunctor-handler-permutations]
+  describe "Gongju.Profunctor Curried Category & Handler Permutations" do
+    it "catFlip and catApply work over CurriedCat (->)" do
+      let f x y = (x - y :: Int)
+      catFlip f 5 20 `shouldBe` 15
+      catApply f 20 5 `shouldBe` 15
+
+    it "compCatN composes category morphisms at the leaf" do
+      let f x y = \z -> (x + y + z :: Int)
+          g z = show (z * 2)
+      compCatN @2 g f 10 20 5 `shouldBe` "70"
+
+    it "yankCat pulls curried category inputs to position 0" do
+      let sub3 x y z = (x - y - z :: Int)
+      yankCat @1 sub3 10 100 5 `shouldBe` (100 - 10 - 5)
+      yankCat @2 sub3 5 100 10 `shouldBe` (100 - 10 - 5)
+
+    it "permuteCat permutes curried category inputs arbitrarily" do
+      let tuple3 x y z = (x, y, z) :: (Int, String, Bool)
+          perm = permuteCat @'[2, 0, 1] tuple3
+      perm False 100 "hello" `shouldBe` (100, "hello", False)
+
+    it "permuteHandler reorders environment parameters of an effect handler" do
+      let handler env1 env2 env3 = \(x :: Int) -> env1 ++ ":" ++ show env2 ++ ":" ++ env3 ++ ":" ++ show x
+          handler' = permuteHandler @'[2, 0, 1] handler
+      handler' "c" "a" (42 :: Int) 10 `shouldBe` "a:42:c:10"
+
+    it "compHandlerN adapts profunctor strands produced by an effect handler" do
+      let h e1 e2 = \(x :: Int) -> show (x + e1 * e2)
+          adapted = compHandlerN @2 (lmap (* 2)) h
+      adapted 3 4 5 `shouldBe` "22"
+
+  -- Tested against Note [Tuple-Spine Arrow Permutations] [ref:note-tuple-spine-permutations]
+  describe "Gongju.Profunctor Tuple-Spine Arrow & Strand Permutations" do
+    it "yankTuple pulls tuple slots to the head" do
+      let t3 = (10 :: Int, (20 :: Int, (30 :: Int, ())))
+      yankTuple @0 t3 `shouldBe` t3
+      yankTuple @1 t3 `shouldBe` (20, (10, (30, ())))
+      yankTuple @2 t3 `shouldBe` (30, (10, (20, ())))
+
+    it "permuteTuple permutes right-nested tuple slots arbitrarily" do
+      let t3 = (10 :: Int, (20 :: Int, (30 :: Int, ())))
+      permuteTuple @'[2, 0, 1] t3 `shouldBe` (30, (10, (20, ())))
+      permuteTuple @'[1, 2, 0] t3 `shouldBe` (20, (30, (10, ())))
+
+    it "permuteInputs reorders profunctor strand input tuple spines" do
+      let strand = \(z, (x, (y, ()))) -> show (x * 100 + y * 10 + z :: Int)
+          strand' = permuteInputs @'[2, 0, 1] strand
+      strand' (1, (2, (3, ()))) `shouldBe` "123"
+
+    it "permuteOutputs reorders profunctor strand output tuple spines" do
+      let gen = \() -> (10 :: Int, (20 :: Int, (30 :: Int, ())))
+          gen' = permuteOutputs @'[2, 0, 1] gen
+      gen' () `shouldBe` (30, (10, (20, ())))
+
+    it "dimapPermute simultaneously permutes input and output tuple spines" do
+      let biStrand = \(y, (x, ())) -> (x ++ "!", (y + 1 :: Int, ()))
+          d = dimapPermute @'[1, 0] @'[1, 0] biStrand
+      d ("first", (100 :: Int, ())) `shouldBe` (101, ("first!", ()))
+
+    it "swapStrand swaps binary pair inputs of a profunctor strand" do
+      let p = \(b, a) -> (a - b :: Int)
+      p (5, 20) `shouldBe` 15
+      swapStrand p (5, 20) `shouldBe` (-15)
+
 
 
 
