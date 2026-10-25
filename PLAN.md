@@ -31,9 +31,14 @@
 
 ## Phase 2: Two-Dimensional Contravariant & Monad Grids
 
-- [ ] **Milestone 2.1:** Contravariant Syntax Grids
-  - Multi-argument contravariant combinators (`ContravariantN`).
-  - Type-safe argument pre-processing.
+- [x] **Milestone 2.1:** Contravariant Syntax Grids (`Gongju.Contravariant`)
+  - Multi-argument contravariant combinators (`ContravariantN`, `ContramapN`).
+  - Positional pre-composition (`PrecomposeAt`, `precomposeAt @n`, `(-.)`, `(-.*)`, `(-.**)`, `(-.***)`).
+  - 2D function splicing grid (`SpliceAt`, `spliceAt @n @m`).
+  - Alternating parity stacks (`(<-$>)`, `(<-$$>)`, `(<-$$$>)`, `(<-$$$$>)`).
+  - Canonical `Contravariant`, `Divisible`, and `Decidable` re-exports.
+  - Grounded Note [Contravariant Positional Pre-Composition] `[ref:note-contravariant-precomposition]`.
+  - Grounded Note [Contravariant Functor Alternating Parity] `[ref:note-contravariant-alternating-parity]`.
 - [ ] **Milestone 2.2:** Monadic Curried Binding
   - Arity-indexed monadic composition and Kleisli lifting across curried functions.
 

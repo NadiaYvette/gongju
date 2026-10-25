@@ -14,6 +14,7 @@
 4. **Arbitrary Argument Permutation:** Reordering curried function arguments via positional index lists (`permute @'[2, 0, 1]`) with support for duplicate argument types and partial permutations.
 5. **Grand Unified Tape Engine:** Open-world composition over pure and monadic/comonadic effects using visible-forall `(.@)` and `withOps`.
 6. **Canonical Ecosystem Alignment:** Seamless integration with Hackage standards: `comonad`, `distributive`, `adjunctions` (dual annihilation via `zapLR`/`zapRL`), `kan-extensions` (`Ran`, `Lan`, `Yoneda`, `Codensity` fusion), and `profunctors` (`dimap`, `lmap`, `rmap`).
+7. **Contravariant Syntax Grids:** Positional argument pre-composition (`precomposeAt @n`, `(-.)`, `(-.*)`), 2D function splicing (`spliceAt @n @m`), and nested contravariant functor mapping with alternating parity (`contramapN @n`, `(<-$>)`, `(<-$$>)`).
 
 ---
 

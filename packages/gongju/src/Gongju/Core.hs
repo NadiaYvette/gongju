@@ -55,6 +55,8 @@ module Gongju.Core
   , module Gongju.Kan
     -- * Profunctors and Indexed Profunctors
   , module Gongju.Profunctor
+    -- * Contravariant Syntax Grids & Variance-Flipping Stacks
+  , module Gongju.Contravariant
   ) where
 
 import Gongju.Peano
@@ -66,3 +68,4 @@ import Gongju.Comonad
 import Gongju.Adjunction
 import Gongju.Kan
 import Gongju.Profunctor
+import Gongju.Contravariant

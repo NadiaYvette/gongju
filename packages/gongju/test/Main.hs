@@ -241,3 +241,84 @@ main = hspec do
           g = dimap (* 2) show f
       g 5 `shouldBe` "20"
 
+  -- Tested against Note [Contravariant Positional Pre-Composition] [ref:note-contravariant-precomposition]
+  describe "Gongju.Contravariant Positional Pre-Composition & 2D Splicing" do
+    it "precomposeAt @0 and (-.) pre-compose argument 0" do
+      let f x y = (x - y :: Int)
+          g = precomposeAt @0 (* 2) f
+          h = (* 2) -. f
+      g 10 3 `shouldBe` 17
+      h 10 3 `shouldBe` 17
+
+    it "precomposeAt @1 and (-.*) pre-compose argument 1" do
+      let f x y z = (x + y * z :: Int)
+          g = precomposeAt @1 (+ 10) f
+          h = (+ 10) -.* f
+      g 5 2 3 `shouldBe` 41
+      h 5 2 3 `shouldBe` 41
+
+    it "precomposeAt @2 and (-.**) pre-compose argument 2" do
+      let tuple3 x y z = (x, y, z) :: (Int, String, Bool)
+          g = precomposeAt @2 not tuple3
+          h = not -.** tuple3
+      g 10 "abc" False `shouldBe` (10, "abc", True)
+      h 10 "abc" False `shouldBe` (10, "abc", True)
+
+    it "precomposeAt @3 and (-.***) pre-compose argument 3" do
+      let tuple4 w x y z = (w, x, y, z) :: (Int, Int, Int, Int)
+          g = precomposeAt @3 (* 100) tuple4
+          h = (* 100) -.*** tuple4
+      g 1 2 3 4 `shouldBe` (1, 2, 3, 400)
+      h 1 2 3 4 `shouldBe` (1, 2, 3, 400)
+
+    it "spliceAt @1 @2 splices a binary function into slot 1 of a ternary function" do
+      let add3 x y z = (x + y + z :: Int)
+          mult2 u v = (u * v :: Int)
+          spliced = spliceAt @1 @2 mult2 add3
+      spliced 10 3 4 5 `shouldBe` 27
+
+    it "spliceAt @0 @3 splices a ternary function into slot 0" do
+      let add2 a b = (a + b :: Int)
+          prod3 x y z = (x * y * z :: Int)
+          spliced = spliceAt @0 @3 prod3 add2
+      spliced 2 3 4 10 `shouldBe` 34
+
+  -- Tested against Note [Contravariant Functor Alternating Parity] [ref:note-contravariant-alternating-parity]
+  describe "Gongju.Contravariant Alternating Parity Stacks" do
+    it "contramapN @1 and (<-$>) invert variance on 1-layer Predicate" do
+      let isPositive = Predicate (> (0 :: Int))
+          p1 = contramapN @1 (* 2) isPositive
+          p2 = (* 2) <-$> isPositive
+      getPredicate p1 5 `shouldBe` True
+      getPredicate p1 (-1) `shouldBe` False
+      getPredicate p2 5 `shouldBe` True
+      getPredicate p2 (-1) `shouldBe` False
+
+    it "contramapN @2 and (<-$$>) cancel variance inversion on 2-layer Predicate (covariant)" do
+      let pp = Predicate (\(Predicate p) -> p (10 :: Int)) :: Predicate (Predicate Int)
+          pp1 = contramapN @2 (* 2) pp
+          pp2 = (* 2) <-$$> pp
+      getPredicate pp1 (Predicate (> 15)) `shouldBe` True
+      getPredicate pp1 (Predicate (> 25)) `shouldBe` False
+      getPredicate pp2 (Predicate (> 15)) `shouldBe` True
+      getPredicate pp2 (Predicate (> 25)) `shouldBe` False
+
+    it "contramapN @3 and (<-$$$>) invert variance on 3-layer Predicate (contravariant)" do
+      let ppp = Predicate (\(Predicate pp) -> pp (Predicate (> (15 :: Int)))) :: Predicate (Predicate (Predicate Int))
+          ppp1 = contramapN @3 (* 2) ppp
+          ppp2 = (* 2) <-$$$> ppp
+          evalTest val = Predicate (\(Predicate p) -> p (val :: Int))
+      getPredicate ppp1 (evalTest 10) `shouldBe` True
+      getPredicate ppp1 (evalTest 5) `shouldBe` False
+      getPredicate ppp2 (evalTest 10) `shouldBe` True
+      getPredicate ppp2 (evalTest 5) `shouldBe` False
+
+    it "supports Divisible divide combining two predicates" do
+      let pEven = Predicate even :: Predicate Int
+          pPositive = Predicate (> 0) :: Predicate Int
+          pCombined = divide (\x -> (x, x)) pEven pPositive
+      getPredicate pCombined 4 `shouldBe` True
+      getPredicate pCombined 3 `shouldBe` False
+      getPredicate pCombined (-2) `shouldBe` False
+
+

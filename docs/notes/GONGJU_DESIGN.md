@@ -59,6 +59,10 @@ Historically, Haskell developers seeking multi-argument function manipulation fa
   - `Data.Profunctor.Profunctor` from `profunctors` and `Data.Profunctor.Indexed.IxProfunctor` from `indexed-profunctors`
 - **Rationale:** Enables prevalent real-world usage patterns to benefit from Gongju's tape engine (`.@`, `withOps`) without orphan instances or artificial wrapper newtypes.
 
+### D8: Two-Dimensional Contravariant Syntax Grids & Alternating Parity
+- **Decision:** Multi-argument contravariant combinators collapse into two inductive typeclasses with bidirectional fundeps ('PrecomposeAt' and 'SpliceAt') alongside nested contravariant functor mapping ('ContramapN').
+- **Rationale:** Positional pre-composition parameterizes along argument position $n$ and spliced arity $m$, avoiding Template Haskell explosion while ensuring full bidirectional type inference. Nested contravariant mapping flips arrow variance at each layer, automatically tracking parity cancellation across inductive steps.
+
 ---
 
 ## 3. Grounded Notes Architecture
@@ -75,3 +79,9 @@ Historically, Haskell developers seeking multi-argument function manipulation fa
 - **Note [Iterated Yank Index Adjustment]** (`Gongju.Permute`):  
   [ref:note-iterated-yank-adjustment]  
   Details index adjustment mathematics for decomposed permutations over curried functions.
+- **Note [Contravariant Positional Pre-Composition]** (`Gongju.Contravariant`):  
+  [ref:note-contravariant-precomposition]  
+  Formalizes positional pre-composition ('PrecomposeAt') and 2D function splicing ('SpliceAt') across curried function argument arrows.
+- **Note [Contravariant Functor Alternating Parity]** (`Gongju.Contravariant`):  
+  [ref:note-contravariant-alternating-parity]  
+  Formalizes bidirectional functional dependencies and arrow-flipping parity swap in nested contravariant functor stacks ('ContramapN').

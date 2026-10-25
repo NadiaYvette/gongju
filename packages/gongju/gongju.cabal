@@ -37,6 +37,7 @@ library
         Gongju.Adjunction
         Gongju.Kan
         Gongju.Profunctor
+        Gongju.Contravariant
     build-depends:
         base >= 4.18 && < 5
       , adjunctions >= 4.4
@@ -46,6 +47,7 @@ library
       , indexed-profunctors >= 0.1
       , kan-extensions >= 5.2
       , profunctors >= 5.6
+      , contravariant >= 1.5
 
 test-suite gongju-test
     import:             commons
@@ -56,6 +58,7 @@ test-suite gongju-test
         base >= 4.18 && < 5
       , adjunctions >= 4.4
       , comonad >= 5.0
+      , contravariant >= 1.5
       , distributive >= 0.6
       , gongju
       , hspec >= 2.11
