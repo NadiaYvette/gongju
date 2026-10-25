@@ -38,7 +38,9 @@ module Gongju.Comonad
   , PullDist
   ) where
 
-import Data.Kind (Type)
+import Control.Comonad (Comonad (..))
+import Data.Distributive (Distributive (..))
+import Data.Functor.Rep (Representable (..))
 import Gongju.Composition
   ( ApPath (..)
   , ApStep (..)
@@ -53,37 +55,6 @@ import Gongju.Composition
   )
 import Gongju.Peano (Append, Init)
 import Gongju.Positional (ExpectArrow)
-
--- ---------------------------------------------------------------------------
--- 1. Categorical Classes (Comonad, Distributive, Representable)
--- ---------------------------------------------------------------------------
-
--- | Dual of Monad: extraction and context duplication.
-class Functor w => Comonad (w :: Type -> Type) where
-  -- | Extract the focal value from a comonadic context.
-  extract :: w a -> a
-  -- | Duplicate the comonadic context into nested layers.
-  duplicate :: w a -> w (w a)
-  -- | Extend a cokleisli arrow over a comonad.
-  extend :: (w a -> b) -> w a -> w b
-  extend f = fmap f . duplicate
-
--- | Dual of Traversable: commute ANY functor outside a distributive functor.
-class Functor g => Distributive (g :: Type -> Type) where
-  -- | Distribute an outer functor over an inner distributive functor.
-  distribute :: Functor f => f (g a) -> g (f a)
-  -- | Collect elements using a distributive-producing function.
-  collect :: Functor f => (a -> g b) -> f a -> g (f b)
-  collect f = distribute . fmap f
-
--- | Representable functors isomorphic to function spaces @(Rep g -> a)@.
-class Distributive g => Representable (g :: Type -> Type) where
-  -- | The index type representing the space of values.
-  type Rep g :: Type
-  -- | Tabulate a function from the index representation into the container.
-  tabulate :: (Rep g -> a) -> g a
-  -- | Index into a representable container at position @Rep g@.
-  index :: g a -> Rep g -> a
 
 -- ---------------------------------------------------------------------------
 -- 2. Open Mode & Layer Tags

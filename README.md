@@ -13,6 +13,7 @@
 3. **Positional Combinators:** Pulling arguments to the front (`slipr @n`), pushing them deeper (`slipl @n`), and swapping adjacent arguments (`twist @n`) directly on curried function arrows without heap allocations.
 4. **Arbitrary Argument Permutation:** Reordering curried function arguments via positional index lists (`permute @'[2, 0, 1]`) with support for duplicate argument types and partial permutations.
 5. **Grand Unified Tape Engine:** Open-world composition over pure and monadic/comonadic effects using visible-forall `(.@)` and `withOps`.
+6. **Canonical Ecosystem Alignment:** Seamless integration with Hackage standards: `comonad`, `distributive`, `adjunctions` (dual annihilation via `zapLR`/`zapRL`), `kan-extensions` (`Ran`, `Lan`, `Yoneda`, `Codensity` fusion), and `profunctors` (`dimap`, `lmap`, `rmap`).
 
 ---
 

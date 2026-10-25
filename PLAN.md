@@ -18,14 +18,14 @@
 - [x] **Milestone 1.3:** Positional Curried Arrow Manipulation (`Gongju.Positional`)
   - `Yank` / `slipr @n`, `Shove` / `slipl @n`, `Twist` / `twist @n`.
   - Grounded Note [Positional Curried Arrow Manipulation] `[ref:note-positional-arrow-manipulation]`.
-- [x] **Milestone 1.4:** Arbitrary Permutations & Grand Unified Tape Engine (`Gongju.Permute`, `Gongju.Composition`, `Gongju.Indexed`, `Gongju.Comonad`)
+- [x] **Milestone 1.4:** Arbitrary Permutations & Grand Unified Tape Engine (`Gongju.Permute`, `Gongju.Composition`, `Gongju.Indexed`, `Gongju.Comonad`, `Gongju.Adjunction`, `Gongju.Kan`, `Gongju.Profunctor`)
   - `Permute` / `permute @ns` via iterated `Yank` and `Adjust`.
   - Open-world tape execution via `StepPathMask`, `StepRole`, visible `(.@)`, and `withOps`.
-  - Indexed effects (`IxFunctor`, `IxApplicative`, `IxMonad`, `IxComonad`) and comonad/distributive commutation.
+  - Canonical Hackage alignment: `comonad`, `distributive`, `adjunctions` (`zapLR`/`zapRL`), `indexed` (`IxFunctor`, `IxApplicative`, `IxMonad`), `kan-extensions` (`Ran`, `Lan`, `Yoneda`, `Codensity`), and `profunctors` (`dimap`, `P1`, `P2`).
   - Grounded Note [Iterated Yank Index Adjustment] `[ref:note-iterated-yank-adjustment]`.
 - [x] **Milestone 1.5:** Turnkey Verification Suite
   - 5-gate physical verification harness (`bin/gongju-verify`).
-  - Hspec test suite passing 17/17 specifications.
+  - Hspec test suite passing 28/28 specifications across all 9 modules.
 
 ---
 

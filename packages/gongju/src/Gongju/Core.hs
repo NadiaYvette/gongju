@@ -49,6 +49,12 @@ module Gongju.Core
   , module Gongju.Indexed
     -- * Comonads, Distributive, and Representable Functors
   , module Gongju.Comonad
+    -- * Adjunction Transitions and Dual Annihilation
+  , module Gongju.Adjunction
+    -- * Kan Extensions, Yoneda, and Codensity Fusion
+  , module Gongju.Kan
+    -- * Profunctors and Indexed Profunctors
+  , module Gongju.Profunctor
   ) where
 
 import Gongju.Peano
@@ -57,3 +63,6 @@ import Gongju.Permute
 import Gongju.Composition
 import Gongju.Indexed
 import Gongju.Comonad
+import Gongju.Adjunction
+import Gongju.Kan
+import Gongju.Profunctor

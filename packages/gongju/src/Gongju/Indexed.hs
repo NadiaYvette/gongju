@@ -20,11 +20,19 @@
 -- Plugs indexed functorial structures ('IxFunctor', 'IxApplicative', 'IxMonad',
 -- 'IxComonad') into Gongju's open tape composition engine without modifying Core.
 module Gongju.Indexed
-  ( -- * Indexed Categorical Classes
+  ( -- * Re-exported Canonical Indexed Classes
     IxFunctor(..)
+  , IxPointed(..)
+  , IxCopointed(..)
   , IxApplicative(..)
+  , ipure
+  , iliftA2
   , IxMonad(..)
+  , (>>>=)
+  , (=<<<)
+  , ijoin
   , IxComonad(..)
+  , iduplicate
     -- * Open Indexed Tags
   , IxF
   , PIM
@@ -37,6 +45,22 @@ module Gongju.Indexed
   , IxW
   ) where
 
+import Control.Comonad.Indexed
+  ( IxComonad (..)
+  , iduplicate
+  )
+import Control.Monad.Indexed
+  ( IxApplicative (..)
+  , IxMonad (..)
+  , ijoin
+  , (=<<<)
+  , (>>>=)
+  )
+import Data.Functor.Indexed
+  ( IxCopointed (..)
+  , IxFunctor (..)
+  , IxPointed (..)
+  )
 import Data.Kind (Type)
 import Gongju.Composition
   ( ApPath (..)
@@ -50,43 +74,15 @@ import Gongju.Composition
 import Gongju.Peano (Append, Init)
 import Gongju.Positional (ExpectArrow)
 
--- ---------------------------------------------------------------------------
--- 1. Indexed Categorical Classes
--- ---------------------------------------------------------------------------
+-- | Ergonomic alias for 'ireturn'.
+ipure :: IxPointed m => a -> m i i a
+ipure = ireturn
+{-# INLINE ipure #-}
 
--- | Indexed Functor parameterized over source and target index states.
-class IxFunctor (m :: idx -> idx -> Type -> Type) where
-  -- | Map a transformation over an indexed functor value.
-  imap :: (a -> b) -> m i j a -> m i j b
-
--- | Indexed Applicative with index-preserving pure and transition-composing iap.
-class IxFunctor m => IxApplicative (m :: idx -> idx -> Type -> Type) where
-  -- | Lift a pure value into an indexed structure with identical pre- and post-indices.
-  ipure :: a -> m i i a
-  -- | Applicative function application chaining index transition @i -> j@ with @j -> l@.
-  iap :: m i j (a -> b) -> m j l a -> m i l b
-  -- | Lift a binary function across two indexed applicatives.
-  iliftA2 :: (a -> b -> c) -> m i j a -> m j l b -> m i l c
-  iliftA2 f ma mb = iap (imap f ma) mb
-
--- | Indexed Monad with state-transitioning bind ('ibind').
-class IxApplicative m => IxMonad (m :: idx -> idx -> Type -> Type) where
-  -- | Bind an indexed monadic value to a transition-producing continuation.
-  ibind :: m i j a -> (a -> m j l b) -> m i l b
-  -- | Join a nested indexed monadic transition.
-  ijoin :: m i j (m j l a) -> m i l a
-  ijoin mm = ibind mm id
-  {-# INLINE ijoin #-}
-
--- | Atkey Indexed Comonad splitting index transition @i -> k@ across an intermediate index @j@.
-class IxFunctor w => IxComonad (w :: idx -> idx -> Type -> Type) where
-  -- | Extract a pure value from an indexed comonadic identity context.
-  iextract :: w i i a -> a
-  -- | Duplicate an indexed context by decomposing state transition @i -> k@ across @j@.
-  iduplicate :: w i k a -> w i j (w j k a)
-  -- | Extend a cokleisli arrow across an indexed comonad.
-  iextend :: (w j k a -> b) -> w i k a -> w i j b
-  iextend f = imap f . iduplicate
+-- | Lift a binary function across two indexed applicatives.
+iliftA2 :: IxApplicative m => (a -> b -> c) -> m i j a -> m j l b -> m i l c
+iliftA2 f ma mb = iap (imap f ma) mb
+{-# INLINE iliftA2 #-}
 
 -- ---------------------------------------------------------------------------
 -- 2. Open Indexed Tags
@@ -147,7 +143,7 @@ instance forall base l ls ms m t3 acc acc' out' idx (φ :: idx -> idx -> Type ->
   stepRole f acc fa =
     stepPathMask @base @(l ': ls) @ms @m @t3 @acc' @out' f
       (mapPath @(Init (l ': ls)) @(φ i j (a -> rTail)) @(φ i rIdx rTail)
-        (\mf -> mf `ibind` (`imap` fa)) acc)
+        (\mf -> mf >>>= (`imap` fa)) acc)
   {-# INLINE stepRole #-}
 
 instance forall base active ms m t3 acc acc' out idx (φ :: idx -> idx -> Type -> Type) i j rIdx inner.

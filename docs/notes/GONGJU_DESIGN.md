@@ -49,6 +49,16 @@ Historically, Haskell developers seeking multi-argument function manipulation fa
 - **Decision:** Every package in `gongju` compiles under `-Wall -Wcompat -Wredundant-constraints` and clean HLint hints.
 - **Precedence Rule:** Per `DOC_STRATEGY.md` §4, code wins at runtime; when code changes contradict this document, this document must be corrected in the same commit.
 
+### D7: Canonical Hackage Ecosystem Integration (Kmettverse Alignment)
+- **Decision:** Rather than retaining homebrew or isolated categorical classes, Gongju directly imports, implements open tape steps for, and re-exports the canonical Hackage classes:
+  - `Control.Comonad.Comonad` from `comonad`
+  - `Data.Distributive.Distributive` from `distributive`
+  - `Data.Functor.Rep.Representable` and `Data.Functor.Adjunction.Adjunction` from `adjunctions`
+  - `Data.Functor.Indexed` (`IxFunctor`, `IxPointed`), `Control.Monad.Indexed` (`IxApplicative`, `IxMonad`), and `Control.Comonad.Indexed` (`IxComonad`) from `indexed`
+  - `Data.Functor.Kan.Lan` (`Lan`), `Data.Functor.Kan.Ran` (`Ran`), `Data.Functor.Yoneda` (`Yoneda`), `Data.Functor.Coyoneda` (`Coyoneda`), `Control.Monad.Codensity` (`Codensity`), and `Control.Comonad.Density` (`Density`) from `kan-extensions`
+  - `Data.Profunctor.Profunctor` from `profunctors` and `Data.Profunctor.Indexed.IxProfunctor` from `indexed-profunctors`
+- **Rationale:** Enables prevalent real-world usage patterns to benefit from Gongju's tape engine (`.@`, `withOps`) without orphan instances or artificial wrapper newtypes.
+
 ---
 
 ## 3. Grounded Notes Architecture

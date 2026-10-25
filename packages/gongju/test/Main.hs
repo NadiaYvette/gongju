@@ -5,16 +5,30 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE RequiredTypeArguments #-}
+{-# LANGUAGE TupleSections #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
 
+-- | Test Suite for Gongju: Grand Unified Open-World Tape Engine and Permutation Library
+--
+-- Validates:
+-- * Peano natural transformations and bidirectional fundep inference.
+-- * Variadic composition and open-world tape execution via visible-forall (.@).
+-- * Positional combinators (slipr, slipl, twist) and arbitrary permutation (permute).
+-- * Indexed monad and comonad transitions (IxFunctor, IxPointed, IxApplicative, IxMonad).
+-- * Canonical comonads, distributive functors, and representable commute laws.
+-- * Canonical adjunctions with dual annihilation (zapLR, zapRL, unit, counit).
+-- * Canonical Kan extensions (Ran, Lan), Yoneda fusion, and Codensity CPS optimizations.
+-- * Canonical profunctors with contravariant/covariant slot mappings.
 module Main (main) where
 
 import Test.Hspec
+import Data.Functor.Identity (Identity (..))
 import Gongju.Core
 
--- Simple Test Comonad
-data IdW a = IdW a
+-- | Minimal Comonad fixture for verifying cokleisli extension via 'W'.
+-- Implements canonical 'Control.Comonad.Comonad'.
+newtype IdW a = IdW a
   deriving (Eq, Show)
 
 instance Functor IdW where
@@ -24,7 +38,8 @@ instance Comonad IdW where
   extract (IdW a) = a
   duplicate (IdW a) = IdW (IdW a)
 
--- Simple Test Distributive / Representable Functor (Reader r a)
+-- | Minimal Distributive and Representable Functor fixture (Reader functor).
+-- Validates effect commutation outside a comonad via 'Dist'.
 newtype ReaderR r a = ReaderR { runReaderR :: r -> a }
 
 instance Functor (ReaderR r) where
@@ -38,22 +53,25 @@ instance Representable (ReaderR r) where
   tabulate = ReaderR
   index (ReaderR f) = f
 
--- Simple Test Indexed Monad: Indexed State
+-- | Minimal Indexed State Monad fixture.
+-- Implements canonical 'Data.Functor.Indexed' and 'Control.Monad.Indexed'.
 newtype IxState i j a = IxState { runIxState :: i -> (a, j) }
 
 instance IxFunctor IxState where
   imap f (IxState g) = IxState \i ->
     let (a, j) = g i in (f a, j)
 
+instance IxPointed IxState where
+  ireturn a = IxState (a,)
+
 instance IxApplicative IxState where
-  ipure a = IxState \i -> (a, i)
   iap (IxState gf) (IxState ga) = IxState \i ->
     let (f, j) = gf i
         (a, l) = ga j
     in (f a, l)
 
 instance IxMonad IxState where
-  ibind (IxState g) k = IxState \i ->
+  ibind k (IxState g) = IxState \i ->
     let (a, j) = g i
     in runIxState (k a) j
 
@@ -151,3 +169,75 @@ main = hspec do
           comp = withOps [W, P, PullDist] id g
           readerRes = comp (IdW 10) (5 :: Int)
       runReaderR readerRes "abc" `shouldBe` IdW 45
+
+  -- Tested against Data.Functor.Adjunction canonical instances
+  describe "Gongju.Adjunction Dual Annihilation & Adjoints" do
+    -- Dual pairing annihilation: zapLR pairs left adjoint (,) with right adjoint (->)
+    it "performs dual annihilation via zapLR on ((,) e) and ((->) e)" do
+      let pair = (10 :: Int, length :: String -> Int)
+          f e = replicate e 'x'
+      zapLR pair f `shouldBe` 10
+
+    -- Dual pairing annihilation: zapRL pairs right adjoint (->) with left adjoint (,)
+    it "performs dual annihilation via zapRL on ((->) e) and ((,) e)" do
+      let pair = (10 :: Int, "hello")
+          f :: Int -> String -> Int
+          f e str = length str + e
+      zapRL f pair `shouldBe` 15
+
+    -- Adjunction counit: collapses pair of environment and accessor (e, e -> a) to a
+    it "applies adjunction counit via withOps [AdjC]" do
+      let counitTarget = (5 :: Int, (+ 10) :: Int -> Int)
+          comp = withOps [AdjC] id counitTarget
+      comp `shouldBe` 15
+
+  -- Tested against kan-extensions canonical Ran, Lan, Yoneda, Coyoneda, Codensity
+  describe "Gongju.Kan Right/Left Kan Extensions, Yoneda & Codensity" do
+    -- Universal counit of Right Kan extension collapses Ran g h (g a) to h a
+    it "counit collapses Ran to underlying functor via ranCounit" do
+      let ranVal = ranUnit (Identity (42 :: Int))
+      runIdentity (ranCounit ranVal) `shouldBe` 42
+
+    -- Universal unit of Left Kan extension embeds h a into Lan g h (g a)
+    it "unit embeds functor into Lan via lanUnit" do
+      let lanVal = lanUnit (Identity (99 :: Int)) :: Lan Identity Identity (Identity Int)
+      runIdentity (lanCounit lanVal) `shouldBe` 99
+
+    -- Coyoneda allows fmap fusion without requiring Functor constraints until lowering
+    it "fuses mapping via Coyoneda lifting and lowering" do
+      let co = liftCoyoneda [1, 2, 3 :: Int]
+          coMapped = fmap (+ 10) co
+      lowerCoyoneda coMapped `shouldBe` [11, 12, 13]
+
+    -- Yoneda provides O(1) CPS composition for arbitrary covariant functors
+    it "fuses mapping via Yoneda lifting and lowering" do
+      let yon = liftYoneda [1, 2, 3 :: Int]
+          yonMapped = fmap (* 2) yon
+      lowerYoneda yonMapped `shouldBe` [2, 4, 6]
+
+    -- Codensity optimizes right-associated monadic bind chains into O(1) continuations
+    it "optimizes monad bind CPS via Codensity" do
+      let cod = liftCodensity (Just (100 :: Int))
+          codBound = cod >>= \x -> pure (x + 23)
+      lowerCodensity codBound `shouldBe` Just 123
+
+  -- Tested against profunctors canonical Profunctor and dimap
+  describe "Gongju.Profunctor Contravariant/Covariant Mapping" do
+    -- Contravariant pre-processing of input arguments via P1 (lmap)
+    it "maps profunctor first slot contravariantly via mapPath @'[P1]" do
+      let f = (+ 10) :: Int -> Int
+          g = mapPath @'[P1] (* 2) f
+      g 5 `shouldBe` 20
+
+    -- Covariant post-processing of return values via P2 (rmap)
+    it "maps profunctor second slot covariantly via mapPath @'[P2]" do
+      let f = (+ 10) :: Int -> Int
+          g = mapPath @'[P2] (* 2) f
+      g 5 `shouldBe` 30
+
+    -- Simultaneous bidirectional transformation via dimap
+    it "dimaps both profunctor slots simultaneously via dimap" do
+      let f = (+ 10) :: Int -> Int
+          g = dimap (* 2) show f
+      g 5 `shouldBe` "20"
+

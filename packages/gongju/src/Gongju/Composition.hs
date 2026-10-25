@@ -33,8 +33,6 @@ module Gongju.Composition
   , B1
   , B2
   , BB
-  , P1
-  , P2
   , Fn
     -- * Open Mapping Primitives
   , MapStep(..)
@@ -136,12 +134,6 @@ data B2
 
 -- | Bifunctor diagonal tag (both slots).
 data BB
-
--- | Profunctor first slot tag (contravariant).
-data P1
-
--- | Profunctor second slot tag (covariant).
-data P2
 
 -- | Replicate @n@ covariant 'F' functor layers.
 type Fn (n :: Nat) = Replicate n F
