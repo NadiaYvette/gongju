@@ -57,6 +57,8 @@ module Gongju.Core
   , module Gongju.Profunctor
     -- * Contravariant Syntax Grids & Variance-Flipping Stacks
   , module Gongju.Contravariant
+    -- * Positional Monadic Binding & Lifting Masks
+  , module Gongju.Monad
   ) where
 
 import Gongju.Peano
@@ -69,3 +71,4 @@ import Gongju.Adjunction
 import Gongju.Kan
 import Gongju.Profunctor
 import Gongju.Contravariant
+import Gongju.Monad

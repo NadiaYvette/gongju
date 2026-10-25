@@ -38,6 +38,7 @@ library
         Gongju.Kan
         Gongju.Profunctor
         Gongju.Contravariant
+        Gongju.Monad
     build-depends:
         base >= 4.18 && < 5
       , adjunctions >= 4.4

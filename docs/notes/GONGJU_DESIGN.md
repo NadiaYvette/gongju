@@ -63,6 +63,10 @@ Historically, Haskell developers seeking multi-argument function manipulation fa
 - **Decision:** Multi-argument contravariant combinators collapse into two inductive typeclasses with bidirectional fundeps ('PrecomposeAt' and 'SpliceAt') alongside nested contravariant functor mapping ('ContramapN').
 - **Rationale:** Positional pre-composition parameterizes along argument position $n$ and spliced arity $m$, avoiding Template Haskell explosion while ensuring full bidirectional type inference. Nested contravariant mapping flips arrow variance at each layer, automatically tracking parity cancellation across inductive steps.
 
+### D9: Two-Phase Positional Monadic Binding and Multi-Slot Masks
+- **Decision:** Interior and trailing monadic binds collapse into a two-phase induction pipeline ('BindAfter' floating trailing pure arguments outside '(>>=)' and 'BindPos' skipping leading arguments) accompanied by arbitrary multi-slot boolean lifting masks ('LiftMask') and arity Kleisli composition ('bindKleisliN').
+- **Rationale:** Replaces hundreds of fixed Template Haskell monadic operators ('Control.Monad.Syntax.Two' through '.Six') with two typeclasses maintaining bidirectional functional dependencies. 'LiftMask' allows arbitrary combinations of pure and monadic parameters in a single pass without intermediate tuple packaging.
+
 ---
 
 ## 3. Grounded Notes Architecture
@@ -85,3 +89,10 @@ Historically, Haskell developers seeking multi-argument function manipulation fa
 - **Note [Contravariant Functor Alternating Parity]** (`Gongju.Contravariant`):  
   [ref:note-contravariant-alternating-parity]  
   Formalizes bidirectional functional dependencies and arrow-flipping parity swap in nested contravariant functor stacks ('ContramapN').
+- **Note [Positional Monadic Curried Binding]** (`Gongju.Monad`):  
+  [ref:note-positional-monadic-binding]  
+  Details two-phase structural Peano induction ('BindAfter' and 'BindPos') floating trailing pure arguments outside '(>>=)' to bind interior and trailing monadic arguments.
+- **Note [Multi-Slot Monadic Lifting Masks]** (`Gongju.Monad`):  
+  [ref:note-multislot-monadic-masks]  
+  Formalizes multi-slot argument lifting masks ('LiftMask', 'ArgMode') transforming any arbitrary subset of curried arguments into monadic inputs in a single pass.
+

@@ -15,6 +15,7 @@
 5. **Grand Unified Tape Engine:** Open-world composition over pure and monadic/comonadic effects using visible-forall `(.@)` and `withOps`.
 6. **Canonical Ecosystem Alignment:** Seamless integration with Hackage standards: `comonad`, `distributive`, `adjunctions` (dual annihilation via `zapLR`/`zapRL`), `kan-extensions` (`Ran`, `Lan`, `Yoneda`, `Codensity` fusion), and `profunctors` (`dimap`, `lmap`, `rmap`).
 7. **Contravariant Syntax Grids:** Positional argument pre-composition (`precomposeAt @n`, `(-.)`, `(-.*)`), 2D function splicing (`spliceAt @n @m`), and nested contravariant functor mapping with alternating parity (`contramapN @n`, `(<-$>)`, `(<-$$>)`).
+8. **Monadic Curried Binding & Lifting Masks:** Two-phase positional monadic binding (`bindPos @before @after`, `bindAt @n`, `(==<<)`, `(=.=<<)`), multi-slot monadic lifting masks (`liftMask @'[MArg, PArg, MArg]`), and arity-indexed Kleisli composition (`liftPureN @n`, `bindKleisliN @n`, `(<=<.)`, `(.>=>)`).
 
 ---
 

@@ -34,6 +34,7 @@ Level 2: Targeted Slice     (view_file StartLine / EndLine)       →   ~200–5
 | `Ran`, `Lan`, `Yoneda`, `Coyoneda`, `Codensity`, `Density` | `Gongju.Kan` | `packages/gongju/src/Gongju/Kan.hs` |
 | `Profunctor`, `IxProfunctor`, `dimap`, `P1`, `P2`, `PP1`, `PP2` | `Gongju.Profunctor` | `packages/gongju/src/Gongju/Profunctor.hs` |
 | `precomposeAt`, `spliceAt`, `contramapN`, `(-.)`, `(<-$>)` | `Gongju.Contravariant` | `packages/gongju/src/Gongju/Contravariant.hs` |
+| `bindPos`, `bindAt`, `liftMask`, `liftPureN`, `(==<<)`, `(=.=<<)` | `Gongju.Monad` | `packages/gongju/src/Gongju/Monad.hs` |
 | Top-level re-exports | `Gongju.Core` | `packages/gongju/src/Gongju/Core.hs` |
 | Unit tests & properties | `Main` (Test) | `packages/gongju/test/Main.hs` |
 

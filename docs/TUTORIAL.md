@@ -316,10 +316,72 @@ g3 5 -- ==> "20"
 
 ---
 
-## 11. Reading Order & Cross-References
+## 11. Positional Monadic Binding & Lifting Masks (`Gongju.Monad`)
+
+Replaces Template Haskell monadic splices (such as `Control.Monad.Syntax` in `composition-extra`) with two-phase Peano induction, multi-slot boolean lifting masks, and arity-indexed Kleisli composition.
+
+### Two-Phase Positional Monadic Binding (`bindPos`, `bindAt`)
+
+When binding a monadic value into a multi-argument function `f :: a -> b -> c -> m d`:
+- **Tail binds** (`after = 0`): `bindAt @n` binds the argument at slot `n`.
+  - `(==<<)` and `(>>==)`: slot 1
+  - `(===<<)` and `(>>===)`: slot 2
+  - `(====<<)` and `(>>====)`: slot 3
+- **Interior binds** (`after > 0`): `bindPos @before @after` skips `before` leading pure arguments and floats `after` trailing pure arguments outside `(>>=)`.
+  - `(=.=<<)` and `(>>=.=)`: slot 1 of 3 (`before = 1, after = 1`)
+  - `(==.<<)` / `(=..<<)` and `(>>.==)` / `(>>..=)`: slot 0 of 3 (`before = 0, after = 2`)
+
+```haskell
+let add3 x y z = pure (x + y + z) :: Maybe Int
+
+-- Tail bind at slot 2:
+(add3 ===<< Just 10) 1 2 -- ==> Just 13
+
+-- Interior bind at slot 1 (middle argument):
+(add3 =.=<< Just 20) 1 3 -- ==> Just 24
+
+-- Interior bind at slot 0 (leading argument):
+(add3 ==.<< Just 10) 2 3 -- ==> Just 15
+```
+
+See Note [Positional Monadic Curried Binding] [ref:note-positional-monadic-binding].
+
+### Multi-Slot Monadic Lifting Masks (`liftMask`)
+
+With the promoted two-element kind `ArgMode = Pure | Monadic` (aliases `PArg`, `MArg`), any arbitrary subset of curried arguments can be lifted into `Monad m` simultaneously in a single pass:
+
+```haskell
+let f a b c = pure (a ++ ":" ++ show b ++ ":" ++ c) :: [String]
+
+-- Lift 1st and 3rd arguments to monadic lists, leaving 2nd argument pure:
+let g = liftMask @'[MArg, PArg, MArg] f
+g ["a", "b"] 42 ["x", "y"]
+-- ==> ["a:42:x", "a:42:y", "b:42:x", "b:42:y"]
+```
+
+See Note [Multi-Slot Monadic Lifting Masks] [ref:note-multislot-monadic-masks].
+
+### Arity-Indexed Kleisli Composition (`bindKleisliN`, `liftPureN`)
+
+Compose Kleisli arrows or lift pure functions across arbitrary curried arities:
+
+```haskell
+-- Lift pure binary function into Applicative:
+liftPureN @2 (+) 3 4 -- ==> Just 7 :: Maybe Int
+
+-- Post-compose Kleisli arrow checkEven after binary monadic function:
+let f x y = Just (x + y :: Int)
+let checkEven z = if even z then Just z else Nothing
+(checkEven <=<. f) 2 4 -- ==> Just 6
+(checkEven <=<. f) 2 3 -- ==> Nothing
+```
+
+---
+
+## 12. Reading Order & Cross-References
 
 - [`docs/INDEX.md`](INDEX.md) — Documentation index and corpus map.
-- [`docs/notes/GONGJU_DESIGN.md`](notes/GONGJU_DESIGN.md) — Canonical architectural decisions (D1–D8).
+- [`docs/notes/GONGJU_DESIGN.md`](notes/GONGJU_DESIGN.md) — Canonical architectural decisions (D1–D9).
 - [`docs/NEWBIE_GUIDE.md`](NEWBIE_GUIDE.md) — Fast symbol navigation and token-conservation guide.
 - [`README.md`](../README.md) — Project status and quickstart.
 - [`PLAN.md`](../PLAN.md) — Strategic engineering roadmap.

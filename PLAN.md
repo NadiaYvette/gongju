@@ -39,8 +39,13 @@
   - Canonical `Contravariant`, `Divisible`, and `Decidable` re-exports.
   - Grounded Note [Contravariant Positional Pre-Composition] `[ref:note-contravariant-precomposition]`.
   - Grounded Note [Contravariant Functor Alternating Parity] `[ref:note-contravariant-alternating-parity]`.
-- [ ] **Milestone 2.2:** Monadic Curried Binding
-  - Arity-indexed monadic composition and Kleisli lifting across curried functions.
+- [x] **Milestone 2.2:** Monadic Curried Binding (`Gongju.Monad`)
+  - Two-phase positional monadic binding (`BindAfter`, `BindPos`, `bindPos`, `bindAt`).
+  - Classic curried monadic operators: tail binds (`(==<<)`, `(===<<)`, `(====<<)`, `(>>==)`, `(>>===)`, `(>>====)`) and interior binds (`(=.=<<)`, `(==.<<)`, `(=..<<)`, `(>>=.=)`, `(>>.==)`, `(>>..=)`).
+  - Multi-slot monadic lifting masks (`LiftMask`, `liftMask`, `ArgMode(Pure, Monadic)`).
+  - Arity-indexed Kleisli composition and pure lifting (`liftPureN`, `bindKleisliN`, `(<=<.)`, `(<=<..)`, `(.>=>)`, `(..>=>)`).
+  - Grounded Note [Positional Monadic Curried Binding] `[ref:note-positional-monadic-binding]`.
+  - Grounded Note [Multi-Slot Monadic Lifting Masks] `[ref:note-multislot-monadic-masks]`.
 
 ---
 

@@ -321,4 +321,88 @@ main = hspec do
       getPredicate pCombined 3 `shouldBe` False
       getPredicate pCombined (-2) `shouldBe` False
 
+  -- Tested against Note [Positional Monadic Curried Binding] [ref:note-positional-monadic-binding]
+  describe "Gongju.Monad Positional Monadic Binding" do
+    it "bindAt @1 and (==<<), (>>==) bind trailing argument slot 1" do
+      let f x y = pure (x * y) :: Maybe Int
+      bindAt @1 f (Just 7) 6 `shouldBe` Just 42
+      (f ==<< Just 7) 6 `shouldBe` Just 42
+      (Just 7 >>== f) 6 `shouldBe` Just 42
+      (f ==<< Nothing) 6 `shouldBe` Nothing
+
+    it "bindAt @2 and (===<<), (>>===) bind trailing argument slot 2" do
+      let add3 x y z = pure (x + y + z) :: Maybe Int
+      bindAt @2 add3 (Just 10) 1 2 `shouldBe` Just 13
+      (add3 ===<< Just 10) 1 2 `shouldBe` Just 13
+      (Just 10 >>=== add3) 1 2 `shouldBe` Just 13
+
+    it "bindAt @3 and (====<<), (>>====) bind trailing argument slot 3" do
+      let add4 w x y z = pure (w + x + y + z) :: Maybe Int
+      bindAt @3 add4 (Just 100) 1 2 3 `shouldBe` Just 106
+      (add4 ====<< Just 100) 1 2 3 `shouldBe` Just 106
+      (Just 100 >>==== add4) 1 2 3 `shouldBe` Just 106
+
+    it "bindPos @1 @1 and (=.=<<), (>>=.=) bind interior slot 1 of 3" do
+      let add3 x y z = pure (x + y + z) :: Maybe Int
+      bindPos @1 @1 add3 (Just 20) 1 3 `shouldBe` Just 24
+      (add3 =.=<< Just 20) 1 3 `shouldBe` Just 24
+      (Just 20 >>=.= add3) 1 3 `shouldBe` Just 24
+      (add3 =.=<< Nothing) 1 3 `shouldBe` Nothing
+
+    it "bindPos @0 @2 and (==.<<), (=..<<), (>>.==), (>>..=) bind interior slot 0 of 3" do
+      let add3 x y z = pure (x + y + z) :: Maybe Int
+      bindPos @0 @2 add3 (Just 10) 2 3 `shouldBe` Just 15
+      (add3 ==.<< Just 10) 2 3 `shouldBe` Just 15
+      (add3 =..<< Just 10) 2 3 `shouldBe` Just 15
+      (Just 10 >>.== add3) 2 3 `shouldBe` Just 15
+      (Just 10 >>..= add3) 2 3 `shouldBe` Just 15
+      (add3 ==.<< Nothing) 2 3 `shouldBe` Nothing
+
+  -- Tested against Note [Multi-Slot Monadic Lifting Masks] [ref:note-multislot-monadic-masks]
+  describe "Gongju.Monad Multi-Slot Lifting Masks" do
+    it "liftMask @'[MArg, PArg, MArg] sequences multiple monadic slots while preserving pure arguments" do
+      let f a b c = pure (a ++ ":" ++ show b ++ ":" ++ c) :: [String]
+          g = liftMask @'[MArg, PArg, MArg] f
+      g ["a", "b"] (42 :: Int) ["x", "y"] `shouldBe` ["a:42:x", "a:42:y", "b:42:x", "b:42:y"]
+
+    it "liftMask @'[PArg, MArg] preserves pure arg 0 and binds monadic arg 1" do
+      let g x y = if y > 0 then Just (x * y) else Nothing :: Maybe Int
+          h = liftMask @'[PArg, MArg] g
+      h (5 :: Int) (Just 3) `shouldBe` Just 15
+      h (5 :: Int) Nothing `shouldBe` Nothing
+
+    it "liftMask @'[MArg, MArg] lifts both arguments into a monad" do
+      let g x y = if y > 0 then Just (x * y) else Nothing :: Maybe Int
+          h = liftMask @'[MArg, MArg] g
+      h (Just 5) (Just 3) `shouldBe` Just 15
+      h Nothing (Just 3) `shouldBe` Nothing
+      h (Just 5) Nothing `shouldBe` Nothing
+
+  describe "Gongju.Monad Arity-Indexed Kleisli Composition & Pure Lifting" do
+    it "liftPureN lifts pure functions to return monadic results" do
+      liftPureN @1 (+ (1 :: Int)) 5 `shouldBe` (Just 6 :: Maybe Int)
+      liftPureN @2 (+) (3 :: Int) 4 `shouldBe` (Just 7 :: Maybe Int)
+      liftPureN @3 (\x y z -> (x + y + z :: Int)) 1 2 3 `shouldBe` (Just 6 :: Maybe Int)
+
+    it "bindKleisliN @2 and (<=<.), (.>=>) post-compose Kleisli arrows after binary functions" do
+      let f x y = Just (x + y :: Int)
+          checkEven z = if even z then Just z else Nothing
+      bindKleisliN @2 checkEven f 2 4 `shouldBe` Just 6
+      bindKleisliN @2 checkEven f 2 3 `shouldBe` Nothing
+      (checkEven <=<. f) 2 4 `shouldBe` Just 6
+      (checkEven <=<. f) 2 3 `shouldBe` Nothing
+      (f .>=> checkEven) 2 4 `shouldBe` Just 6
+      (f .>=> checkEven) 2 3 `shouldBe` Nothing
+
+    it "bindKleisliN @3 and (<=<..), (..>=>) post-compose Kleisli arrows after ternary functions" do
+      let add3M x y z = Just (x + y + z :: Int)
+          checkEven z = if even z then Just z else Nothing
+      bindKleisliN @3 checkEven add3M 1 2 3 `shouldBe` Just 6
+      bindKleisliN @3 checkEven add3M 1 2 4 `shouldBe` Nothing
+      (checkEven <=<.. add3M) 1 2 3 `shouldBe` Just 6
+      (checkEven <=<.. add3M) 1 2 4 `shouldBe` Nothing
+      (add3M ..>=> checkEven) 1 2 3 `shouldBe` Just 6
+      (add3M ..>=> checkEven) 1 2 4 `shouldBe` Nothing
+
+
 

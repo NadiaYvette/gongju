@@ -19,6 +19,7 @@ module Gongju.Peano
   , Append
   , Init
   , Replicate
+  , Length
   ) where
 
 import GHC.TypeLits (Nat, type (-), type (+))
@@ -72,3 +73,8 @@ type family Init (xs :: [k]) :: [k] where
 type family Replicate (n :: Nat) (x :: k) :: [k] where
   Replicate 0 _ = '[]
   Replicate n x = x ': Replicate (n - 1) x
+
+-- | Compute the length of a type-level list as an inductive 'Peano' natural.
+type family Length (xs :: [k]) :: Peano where
+  Length '[]       = 'Z
+  Length (_ ': xs) = 'S (Length xs)
