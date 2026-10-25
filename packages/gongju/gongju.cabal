@@ -55,6 +55,7 @@ test-suite gongju-test
     type:               exitcode-stdio-1.0
     hs-source-dirs:     test
     main-is:            Main.hs
+    other-modules:      CoreInspection
     build-depends:
         base >= 4.18 && < 5
       , adjunctions >= 4.4

@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+# bin/gongju-inspect-core — Zero-Cost GHC Core Inspection Verifier for gongju
+#
+# Mechanically verifies that GHC Core Simplifier under -O2 completely eliminates
+# all typeclass dictionaries ($f..., $d..., C:...) from Gongju combinators,
+# beta-reducing them into pure, direct lambda applications.
+#
+# Tested against:
+# Note [Zero-Cost Inlining and Core Simplification] [ref:note-zero-cost-core-simplification]
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+INSPECTION_SRC="${REPO_ROOT}/packages/gongju/test/CoreInspection.hs"
+TMP_DIR="$(mktemp -d /tmp/gongju-core-inspect.XXXXXX)"
+trap 'rm -rf "${TMP_DIR}"' EXIT
+
+# Determine GHC binary
+GHC_CMD=""
+if [[ -x "${HOME}/.ghcup/bin/ghc-9.14.1" ]]; then
+  GHC_CMD="${HOME}/.ghcup/bin/ghc-9.14.1"
+elif command -v ghc >/dev/null 2>&1; then
+  GHC_CMD="$(command -v ghc)"
+fi
+
+if [[ -z "${GHC_CMD}" ]]; then
+  echo "[-] ERROR: GHC compiler not found in PATH." >&2
+  exit 1
+fi
+
+CORE_DUMP="${TMP_DIR}/CoreInspection.dump-simpl"
+
+# Compile with -O2 and capture simplified Core
+(cd "${REPO_ROOT}" && "${GHC_CMD}" -O2 -ddump-simpl -dsuppress-all -dsuppress-uniques -fforce-recomp \
+  -c "${INSPECTION_SRC}" \
+  -dumpdir "${TMP_DIR}" \
+  -outputdir "${TMP_DIR}" > "${CORE_DUMP}" 2>&1) || {
+    echo "[-] ERROR: Failed to compile CoreInspection.hs under -O2:" >&2
+    cat "${CORE_DUMP}" >&2
+    exit 1
+}
+
+# 1. Dictionary Check: Ensure NO Gongju typeclass dictionaries exist in Core
+FORBIDDEN_DICTS=(
+  "ComposeN"
+  "Permute"
+  "Yank"
+  "Shove"
+  "Twist"
+  "PrecomposeAt"
+  "SpliceAt"
+  "ContramapN"
+  "BindPos"
+  "BindAfter"
+  "LiftMask"
+  "PermuteTuple"
+  "YankTuple"
+  "CurriedCat"
+  "PermuteCat"
+  "YankCat"
+  "ComposeCatN"
+)
+
+for dict in "${FORBIDDEN_DICTS[@]}"; do
+  if grep -E "(\\\$f|\\\$d|C:)${dict}" "${CORE_DUMP}" >/dev/null; then
+    echo "[-] FAILURE: Found residual typeclass dictionary for '${dict}' in GHC Core:" >&2
+    grep -E -C 3 "(\\\$f|\\\$d|C:)${dict}" "${CORE_DUMP}" >&2
+    exit 1
+  fi
+done
+
+# 2. Binding Check: Ensure all 22 test pipelines are present and defined without dictionary parameters
+EXPECTED_BINDINGS=(
+  "testComp2"
+  "testComp3"
+  "testSlipr1"
+  "testSlipl2"
+  "testTwist1"
+  "testYank1"
+  "testShove2"
+  "testPermute3"
+  "testPrecompose1"
+  "testSplice12"
+  "testBind1"
+  "testBindPos11"
+  "testLiftPure2"
+  "testPermuteTuple3"
+  "testPermuteInputs"
+  "testSwapStrand"
+  "testCatFlip"
+  "testCatApply"
+  "testCompCat2"
+  "testYankCat1"
+  "testPermuteCat3"
+  "testPermuteHandler3"
+)
+
+verified_count=0
+for binding in "${EXPECTED_BINDINGS[@]}"; do
+  if ! grep -E -q "^${binding}([ =]|$)" "${CORE_DUMP}"; then
+    echo "[-] FAILURE: Missing expected top-level binding '${binding}' in GHC Core dump." >&2
+    exit 1
+  fi
+  # Verify that the binding does not accept any dictionary parameter ($d)
+  if grep -A 3 -E "^${binding}([ =]|$)" "${CORE_DUMP}" | grep -q '\$d'; then
+    echo "[-] FAILURE: Binding '${binding}' retains dictionary argument in GHC Core." >&2
+    exit 1
+  fi
+  verified_count=$((verified_count + 1))
+done
+
+echo "0 residual dictionaries; ${verified_count}/${#EXPECTED_BINDINGS[@]} pipelines simplified to zero-overhead lambdas."

@@ -25,9 +25,11 @@ module Gongju.Positional
     -- * Yank (Pull to Front)
   , Yank(..)
   , slipr
+  , yank
     -- * Shove (Push Deeper)
   , Shove(..)
   , slipl
+  , shove
     -- * Twist (Adjacent Swap)
   , Twist(..)
   , twist
@@ -99,6 +101,11 @@ slipr :: forall (n :: Nat) f target rest. Yank (ToPeano n) f target rest => f ->
 slipr = yank' @(ToPeano n)
 {-# INLINE slipr #-}
 
+-- | User-facing synonym for 'slipr': pulls the @n@-th argument (0-indexed) to position 0.
+yank :: forall (n :: Nat) f target rest. Yank (ToPeano n) f target rest => f -> target -> rest
+yank = yank' @(ToPeano n)
+{-# INLINE yank #-}
+
 -- | Push the 0-th argument into position @n@, shifting arguments 1 through @n@ to the left.
 class Shove (n :: Peano) a rest f | n a rest -> f, n f -> a rest where
   -- | Internal worker for pushing the head argument deeper.
@@ -118,6 +125,11 @@ instance Shove n a rest r => Shove ('S n) a (b -> rest) (b -> r) where
 slipl :: forall (n :: Nat) a rest f. Shove (ToPeano n) a rest f => (a -> rest) -> f
 slipl = shove' @(ToPeano n)
 {-# INLINE slipl #-}
+
+-- | User-facing synonym for 'slipl': pushes the 0-th argument into position @n@.
+shove :: forall (n :: Nat) a rest f. Shove (ToPeano n) a rest f => (a -> rest) -> f
+shove = shove' @(ToPeano n)
+{-# INLINE shove #-}
 
 -- | Swap adjacent arguments at depth @n@ and @n + 1@.
 class Twist (n :: Peano) f g | n f -> g, n g -> f where

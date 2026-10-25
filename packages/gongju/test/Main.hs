@@ -26,6 +26,7 @@ module Main (main) where
 import Test.Hspec
 import Data.Functor.Identity (Identity (..))
 import Gongju.Core
+import CoreInspection
 
 -- | Minimal Comonad fixture for verifying cokleisli extension via 'W'.
 -- Implements canonical 'Control.Comonad.Comonad'.
@@ -469,6 +470,51 @@ main = hspec do
       let p = \(b, a) -> (a - b :: Int)
       p (5, 20) `shouldBe` 15
       swapStrand p (5, 20) `shouldBe` (-15)
+
+  -- Tested against Note [Zero-Cost Inlining and Core Simplification] [ref:note-zero-cost-core-simplification]
+  describe "Gongju.Core Zero-Cost Inspection Fixtures" do
+    it "testComp2 and testComp3 evaluate arity composition" do
+      testComp2 (* 2) (+) 10 20 `shouldBe` 60
+      testComp3 (* 2) (\x y z -> x + y + z) 1 2 3 `shouldBe` 12
+
+    it "testSlipr1, testSlipl2, testTwist1, testYank1, testShove2 manipulate positional arguments" do
+      let f3 x y z = (x * 100 + y * 10 + z :: Int)
+      testSlipr1 (-) 5 20 `shouldBe` 15
+      testYank1 (-) 5 20 `shouldBe` 15
+      testSlipl2 f3 1 2 3 `shouldBe` 312
+      testShove2 f3 1 2 3 `shouldBe` 312
+      testTwist1 f3 1 3 2 `shouldBe` 123
+
+    it "testPermute3 permutes arguments [2, 0, 1]" do
+      let f3 x y z = (x * 100 + y * 10 + z :: Int)
+      testPermute3 f3 3 1 2 `shouldBe` 123
+
+    it "testPrecompose1 and testSplice12 perform contravariant positional pre-composition" do
+      testPrecompose1 (* 10) (-) 100 5 `shouldBe` 50
+      testSplice12 (*) (\x y z -> x + y + z) 10 3 4 5 `shouldBe` 27
+
+    it "testBind1, testBindPos11, testLiftPure2 perform monadic binding and lifting" do
+      testBind1 (\x y -> Just (x + y)) (Just 20) 10 `shouldBe` Just 30
+      testBind1 (\x y -> Just (x + y)) Nothing 10 `shouldBe` Nothing
+      testBindPos11 (\x y z -> Just (x + y + z)) (Just 20) 10 5 `shouldBe` Just 35
+      testBindPos11 (\x y z -> Just (x + y + z)) Nothing 10 5 `shouldBe` Nothing
+      testLiftPure2 (+) 10 20 `shouldBe` Just 30
+
+    it "testPermuteTuple3, testPermuteInputs, testSwapStrand permute tuple spines and strands" do
+      testPermuteTuple3 (10, (20, (30, ()))) `shouldBe` (30, (10, (20, ())))
+      testPermuteInputs (\(z, (x, (y, ()))) -> x * 100 + y * 10 + z) (1, (2, (3, ()))) `shouldBe` 123
+      testSwapStrand (\(b, a) -> a - b) (5, 20) `shouldBe` (-15)
+
+    it "testCatFlip, testCatApply, testCompCat2, testYankCat1, testPermuteCat3, testPermuteHandler3 manipulate category morphisms" do
+      let f3 x y z = (x * 100 + y * 10 + z :: Int)
+          f4 x y z env = (x * 1000 + y * 100 + z * 10 + env :: Int)
+      testCatFlip (-) 5 20 `shouldBe` 15
+      testCatApply (-) 20 5 `shouldBe` 15
+      testCompCat2 (* 2) (\x y z -> x + y + z) 1 2 3 `shouldBe` 12
+      testYankCat1 (-) 5 20 `shouldBe` 15
+      testPermuteCat3 f3 3 1 2 `shouldBe` 123
+      testPermuteHandler3 f4 3 1 2 4 `shouldBe` 1234
+
 
 
 

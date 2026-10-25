@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
 verify_hlint() {
-  echo "=== [1/5] HLint Static Analysis Gate ==="
+  echo "=== [1/6] HLint Static Analysis Gate ==="
   local hlint_cmd=""
   if [[ -x "${HOME}/.ghcup/bin/hlint" ]]; then
     hlint_cmd="${HOME}/.ghcup/bin/hlint"
@@ -23,13 +23,24 @@ verify_hlint() {
 }
 
 verify_tests() {
-  echo "=== [2/5] Full Cabal Test Suite ==="
+  echo "=== [2/6] Full Cabal Test Suite ==="
   (cd "${REPO_ROOT}" && cabal test all >/dev/null)
   echo "  [+] All test suite assertions PASSED."
 }
 
+verify_core() {
+  echo "=== [3/6] Zero-Cost GHC Core Inspection Gate ==="
+  if [[ -x "${REPO_ROOT}/bin/gongju-inspect-core" ]]; then
+    local core_out
+    core_out="$("${REPO_ROOT}/bin/gongju-inspect-core")"
+    echo "  [+] Zero-cost Core verified: ${core_out}"
+  else
+    echo "  [SKIP] bin/gongju-inspect-core not found or not executable."
+  fi
+}
+
 verify_tagref() {
-  echo "=== [3/5] Tagref Cross-Reference Gate ==="
+  echo "=== [4/6] Tagref Cross-Reference Gate ==="
   if [[ -x "${REPO_ROOT}/bin/gongju-tagref" ]]; then
     local tagref_out
     tagref_out="$("${REPO_ROOT}/bin/gongju-tagref")"
@@ -43,7 +54,7 @@ verify_tagref() {
 }
 
 verify_linkcheck() {
-  echo "=== [4/5] Markdown Link & Anchor Integrity Gate ==="
+  echo "=== [5/6] Markdown Link & Anchor Integrity Gate ==="
   if [[ -x "${REPO_ROOT}/bin/gongju-linkcheck" ]]; then
     local linkcheck_out
     linkcheck_out="$("${REPO_ROOT}/bin/gongju-linkcheck" --quiet)"
@@ -54,7 +65,7 @@ verify_linkcheck() {
 }
 
 verify_cloc() {
-  echo "=== [5/5] CLOC Comment Density Gate ==="
+  echo "=== [6/6] CLOC Comment Density Gate ==="
   if [[ -x "${REPO_ROOT}/bin/gongju-cloc" ]]; then
     local cloc_out
     cloc_out="$("${REPO_ROOT}/bin/gongju-cloc" --quiet --check)"
@@ -66,8 +77,9 @@ verify_cloc() {
 
 verify_hlint
 verify_tests
+verify_core
 verify_tagref
 verify_linkcheck
 verify_cloc
 
-echo "=== All 5 Physical Verification Checks PASSED ==="
+echo "=== All 6 Physical Verification Checks PASSED ==="

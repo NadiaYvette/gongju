@@ -12,7 +12,7 @@ Welcome to the `gongju` technical documentation corpus.
 - [`MAINTAINER_GUIDE.md`](MAINTAINER_GUIDE.md) — Architectural governance, type-level invariants, and verification gates.
 
 ## Design Notes (`docs/notes/`)
-- [`GONGJU_DESIGN.md`](notes/GONGJU_DESIGN.md) — Canonical design monograph: architectural decisions D1–D6, Peano bridge, and permutation mechanics.
+- [`GONGJU_DESIGN.md`](notes/GONGJU_DESIGN.md) — Canonical design monograph: architectural decisions D1–D11, Peano bridge, tape engine, and zero-cost Core verification.
 - [`DOC_STRATEGY.md`](notes/DOC_STRATEGY.md) — Documentation strategy, precedence rules, and lifecycle.
 - [`COMMIT_ATTRIBUTION.md`](notes/COMMIT_ATTRIBUTION.md) — Linux kernel RFC 2822 trailer format standards.
 

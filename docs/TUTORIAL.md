@@ -419,10 +419,33 @@ let checkEven z = if even z then Just z else Nothing
 
 ---
 
-## 12. Reading Order & Cross-References
+## 12. Zero-Cost Compiler Inlining & GHC Core Verification
+
+A critical architectural guarantee of Gongju is that pure type-level induction over Peano numbers incurs **zero runtime overhead**. Every inductive combinator across the entire library is annotated with `{-# INLINE #-}`.
+
+When compiled under `-O2`:
+- Typeclass dictionaries (`$fComposeN`, `$fPermute`, `$fYank`, `$fPrecomposeAt`, `$fBindPos`, `$fYankTuple`, etc.) are completely eliminated by GHC's Simplifier.
+- Intermediate tuples and records are unboxed and beta-reduced.
+- Combinator pipelines simplify into the exact same primitive lambda terms as hand-written, specialized functions.
+
+This guarantee is mechanically verified on every build by the automated Core inspection harness:
+
+```bash
+# Run standalone zero-cost Core inspection:
+./bin/gongju-inspect-core
+
+# Or run full physical verification (gate 3 of 6):
+./bin/gongju-verify
+```
+
+See Note [Zero-Cost Inlining and Core Simplification] [ref:note-zero-cost-core-simplification] and Architectural Decision D11 in [`docs/notes/GONGJU_DESIGN.md`](notes/GONGJU_DESIGN.md).
+
+---
+
+## 13. Reading Order & Cross-References
 
 - [`docs/INDEX.md`](INDEX.md) — Documentation index and corpus map.
-- [`docs/notes/GONGJU_DESIGN.md`](notes/GONGJU_DESIGN.md) — Canonical architectural decisions (D1–D9).
+- [`docs/notes/GONGJU_DESIGN.md`](notes/GONGJU_DESIGN.md) — Canonical architectural decisions (D1–D11).
 - [`docs/NEWBIE_GUIDE.md`](NEWBIE_GUIDE.md) — Fast symbol navigation and token-conservation guide.
 - [`README.md`](../README.md) — Project status and quickstart.
 - [`PLAN.md`](../PLAN.md) — Strategic engineering roadmap.

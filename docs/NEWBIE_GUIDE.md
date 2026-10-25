@@ -35,7 +35,9 @@ Level 2: Targeted Slice     (view_file StartLine / EndLine)       →   ~200–5
 | `Profunctor`, `dimap`, `CurriedCat`, `yankTuple`, `permuteTuple`, `permuteInputs`, `permuteHandler` | `Gongju.Profunctor` | `packages/gongju/src/Gongju/Profunctor.hs` |
 | `precomposeAt`, `spliceAt`, `contramapN`, `(-.)`, `(<-$>)` | `Gongju.Contravariant` | `packages/gongju/src/Gongju/Contravariant.hs` |
 | `bindPos`, `bindAt`, `liftMask`, `liftPureN`, `(==<<)`, `(=.=<<)` | `Gongju.Monad` | `packages/gongju/src/Gongju/Monad.hs` |
-| Top-level re-exports | `Gongju.Core` | `packages/gongju/src/Gongju/Core.hs` |
+| Top-level re-exports & Note [Zero-Cost Inlining and Core Simplification] | `Gongju.Core` | `packages/gongju/src/Gongju/Core.hs` |
+| Core inspection test fixtures | `CoreInspection` | `packages/gongju/test/CoreInspection.hs` |
+| Automated Core inspection verifier | Script | `bin/gongju-inspect-core` |
 | Unit tests & properties | `Main` (Test) | `packages/gongju/test/Main.hs` |
 
 Use targeted line ranges (`StartLine`/`EndLine`) when viewing files.

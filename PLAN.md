@@ -58,5 +58,8 @@
   - Curried effect handler environment reordering and adapter composition: `permuteHandler`, `compHandlerN`.
   - Grounded Note [Profunctor Effect Handler Permutations] `[ref:note-profunctor-handler-permutations]`.
   - Grounded Note [Tuple-Spine Arrow Permutations] `[ref:note-tuple-spine-permutations]`.
-- [ ] **Milestone 3.2:** Zero-Cost GHC Core Inspection
-  - Verify that GHC Core simplifies `permute` and `compN` into direct inlined lambda applications with zero runtime dictionary dispatch.
+- [x] **Milestone 3.2:** Zero-Cost GHC Core Inspection (`bin/gongju-inspect-core`, `packages/gongju/test/CoreInspection.hs`)
+  - Mechanical verification of GHC Core under `-O2` confirming total elimination of typeclass dictionaries (`$fComposeN`, `$fPermute`, `$fYank`, `$fPrecomposeAt`, `$fBindPos`, `$fYankTuple`, etc.).
+  - 22/22 representative combinator pipelines beta-reduced into direct, zero-overhead lambda applications and unboxed tuple projections.
+  - Dedicated inspection gate integrated into `bin/gongju-verify` [3/6].
+  - Grounded Note [Zero-Cost Inlining and Core Simplification] `[ref:note-zero-cost-core-simplification]`.

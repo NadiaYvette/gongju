@@ -36,6 +36,44 @@
 -- >>> -- 3. Positional argument manipulation:
 -- >>> slipr @1 (-) 5 20
 -- 15
+--
+-- = Zero-Cost Compiler Invariants
+--
+-- All inductive typeclasses in Gongju ('ComposeN', 'Permute', 'Yank', 'Shove', 'Twist',
+-- 'PrecomposeAt', 'SpliceAt', 'BindPos', 'BindAfter', 'LiftMask', 'PermuteTuple', 'CurriedCat')
+-- are aggressively annotated with '{-# INLINE #-}'. Under GHC's Simplifier (@-O2@),
+-- all typeclass dictionary passing, Peano induction, and intermediate tuples/records
+-- evaporate completely into direct inlined lambda applications with zero runtime overhead.
+--
+-- See Note [Zero-Cost Inlining and Core Simplification] [ref:note-zero-cost-core-simplification].
+
+{- Note [Zero-Cost Inlining and Core Simplification]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[tag:note-zero-cost-core-simplification]
+Gongju replaces Template Haskell arity generators and runtime tuple coercions with
+pure typeclass induction over structural Peano numbers. A critical architectural
+invariant is that this high-level inductive machinery must incur zero runtime overhead:
+when compiled under '-O2', every Gongju combinator pipeline must simplify in GHC Core
+into the exact same lambda terms as hand-written, specialized functions.
+
+This zero-cost guarantee is achieved through three cooperating invariants:
+  1. Aggressive Inlining: Every inductive method ('composeN'', 'yank'', 'shove'',
+     'twist'', 'permute'', 'precomposeAt'', 'spliceAt'', 'bindPos'', 'bindAfter'',
+     'liftMask', 'yankTuple'', 'permuteTuple'', 'yankCat'', 'permuteCat'') is annotated
+     with '{-# INLINE #-}'.
+  2. Static Resolution of Peano Depths: Because TypeLits literals (@2, @3, @'[2, 0, 1])
+     are resolved to concrete Peano terms ('Z, 'S 'Z, ...) at compile time, the instance
+     search is completely known and terminated during typechecking.
+  3. Beta-Reduction and Dictionary Elimination: Under GHC's Simplifier (-O2), the
+     inlined dictionary methods unroll statically into direct lambda applications.
+     Intermediate records and typeclass dictionaries ($fComposeN, $fPermute, $fYank,
+     $fPrecomposeAt, $fBindPos, $fYankTuple) are completely eliminated via beta-reduction,
+     yielding pure nested function applications and tuple projections with zero allocations
+     and zero indirect calls.
+
+This invariant is mechanically verified on every build by the automated Core inspection
+gate ('bin/gongju-inspect-core' and 'packages/gongju/test/CoreInspection.hs').
+-}
 module Gongju.Core
   ( -- * Peano Naturals & Type-Level List Utilities
     module Gongju.Peano

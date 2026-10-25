@@ -71,6 +71,11 @@ Historically, Haskell developers seeking multi-argument function manipulation fa
 - **Decision:** Profunctor effect handler permutations decouple into curried environment parameter permutations ('permuteHandler' via 'Permute'), point-free curried category spine reordering ('CurriedCat', 'yankCat', 'permuteCat'), and right-nested tuple spine arrow permutations ('YankTuple', 'PermuteTuple', 'permuteInputs', 'permuteOutputs', 'dimapPermute').
 - **Rationale:** Supports arrow and profunctor effect frameworks (such as 'kernmantle-polytropos') where strands consume multi-argument inputs structured as nested tuples or where effect handlers take curried configuration parameters, eliminating intermediate constructor allocations and runtime dictionary overhead.
 
+### D11: Zero-Cost Inlining & Core Verification
+- **Decision:** Every inductive typeclass method across Gongju is annotated with '{-# INLINE #-}' and backed by concrete Peano reduction, guaranteeing that GHC's Simplifier under '-O2' eliminates all typeclass dictionaries, intermediate closures, and tuple allocations, beta-reducing pipelines into direct lambda applications.
+- **Rationale:** Verifies mechanically that Gongju incurs zero runtime overhead compared to hand-written monomorphic functions, achieving zero-cost abstraction for high-arity composition and permutation.
+- **Reference:** Note [Zero-Cost Inlining and Core Simplification] `[ref:note-zero-cost-core-simplification]`.
+
 ---
 
 ## 3. Grounded Notes Architecture
@@ -105,4 +110,8 @@ Historically, Haskell developers seeking multi-argument function manipulation fa
 - **Note [Tuple-Spine Arrow Permutations]** (`Gongju.Profunctor`):  
   [ref:note-tuple-spine-permutations]  
   Formalizes structural induction ('YankTuple', 'PermuteTuple') and profunctor input/output spine permutations ('permuteInputs', 'permuteOutputs', 'dimapPermute') over right-nested arrow tuples.
+- **Note [Zero-Cost Inlining and Core Simplification]** (`Gongju.Core`):  
+  [ref:note-zero-cost-core-simplification]  
+  Formalizes compiler inlining invariants, compile-time Peano reduction, and dictionary elimination verifying zero runtime overhead via automated GHC Core inspection.
+
 
