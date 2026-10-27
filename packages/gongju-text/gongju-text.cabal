@@ -1,0 +1,49 @@
+cabal-version:      3.0
+name:               gongju-text
+version:            0.1.0.0
+synopsis:           Structured text utilities, non-empty text collections, and layout parsing
+description:
+    Gongju-Text provides robust text processing utilities leveraging non-empty
+    refinements, polymorphic container targets, and layout-aware block/stanza parsing.
+license:            EUPL-1.2 OR Apache-2.0
+license-files:      LICENSE
+author:             Nadia Yvette Chambers
+maintainer:         nadia.yvette.chambers@ik.me
+category:           Text, Parsing, Utilities
+build-type:         Simple
+
+common commons
+    default-language:   Haskell2010
+    default-extensions:
+        DerivingStrategies
+        OverloadedStrings
+        ScopedTypeVariables
+        StandaloneDeriving
+        UndecidableInstances
+    ghc-options:        -Wall -Wcompat -Wredundant-constraints
+
+library
+    import:             commons
+    hs-source-dirs:     src
+    exposed-modules:
+        Gongju.Text.NonEmpty
+        Gongju.Text.Stanza
+        Gongju.Text.Layout
+    build-depends:
+        base >= 4.18 && < 5
+      , text >= 2.0
+      , mono-traversable >= 1.0
+      , containers >= 0.6
+      , vector >= 0.12
+
+test-suite gongju-text-test
+    import:             commons
+    type:               exitcode-stdio-1.0
+    hs-source-dirs:     test
+    main-is:            Main.hs
+    build-depends:
+        base >= 4.18 && < 5
+      , text >= 2.0
+      , gongju-text
+      , hspec >= 2.11
+      , containers >= 0.6
