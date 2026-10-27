@@ -40,15 +40,15 @@ library
         Gongju.Contravariant
         Gongju.Monad
     build-depends:
-        base >= 4.18 && < 5
-      , adjunctions >= 4.4
-      , comonad >= 5.0
-      , distributive >= 0.6
-      , indexed >= 0.1
-      , indexed-profunctors >= 0.1
-      , kan-extensions >= 5.2
-      , profunctors >= 5.6
-      , contravariant >= 1.5
+        base              >= 4.18 && < 5
+      , adjunctions       >= 4.4   && < 5
+      , comonad           >= 5     && < 6
+      , distributive      >= 0.6   && < 1
+      , indexed           >= 0.1   && < 1
+      , indexed-profunctors >= 0.1 && < 1
+      , kan-extensions    >= 5.2   && < 6
+      , profunctors       >= 5.6   && < 6
+      , contravariant     >= 1.5   && < 2
 
 test-suite gongju-test
     import:             commons
@@ -57,13 +57,13 @@ test-suite gongju-test
     main-is:            Main.hs
     other-modules:      CoreInspection
     build-depends:
-        base >= 4.18 && < 5
-      , adjunctions >= 4.4
-      , comonad >= 5.0
-      , contravariant >= 1.5
-      , distributive >= 0.6
+        base              >= 4.18 && < 5
+      , adjunctions       >= 4.4   && < 5
+      , comonad           >= 5     && < 6
+      , contravariant     >= 1.5   && < 2
+      , distributive      >= 0.6   && < 1
       , gongju
-      , hspec >= 2.11
-      , indexed >= 0.1
-      , kan-extensions >= 5.2
-      , profunctors >= 5.6
+      , hspec             >= 2.11  && < 3
+      , indexed           >= 0.1   && < 1
+      , kan-extensions    >= 5.2   && < 6
+      , profunctors       >= 5.6   && < 6
