@@ -12,6 +12,13 @@ maintainer:         nadia.yvette.chambers@ik.me
 category:           Text, Parsing, Utilities
 build-type:         Simple
 
+tested-with:
+    GHC == 9.6.7
+  , GHC == 9.8.4
+  , GHC == 9.10.3
+  , GHC == 9.12.4
+  , GHC == 9.14.1
+
 common commons
     default-language:   Haskell2010
     default-extensions:
