@@ -17,14 +17,14 @@
 -- | Module: Gongju.Kan
 -- Description: Kan Extensions, Yoneda, and Codensity Fusion for Gongju
 --
--- Integrates Right and Left Kan extensions ('Ran', 'Lan'), Yoneda lemma embeddings
--- ('Yoneda', 'Coyoneda'), and Codensity / Density monad-comonad generators
--- ('Codensity', 'Density') from 'kan-extensions' into Gongju's open tape composition engine.
+-- Integrates Right and Left Kan extensions ('t:Ran', 't:Lan'), Yoneda lemma embeddings
+-- ('t:Yoneda', 't:Coyoneda'), and Codensity / Density monad-comonad generators
+-- ('t:Codensity', 't:Density') from @kan-extensions@ into Gongju's open tape composition engine.
 --
 -- Enables:
 -- * Structural Kan rewrites without typeclass constraints on @g@ or @h@.
--- * $O(1)$ functor mapping fusion via 'Yoneda' and 'Coyoneda'.
--- * $O(1)$ monad bind optimization via 'Codensity' CPS transformations.
+-- * $O(1)$ functor mapping fusion via 't:Yoneda' and 't:Coyoneda'.
+-- * $O(1)$ monad bind optimization via 't:Codensity' CPS transformations.
 module Gongju.Kan
   ( -- * Re-exported Canonical Kan Types
     Lan(..)
@@ -137,12 +137,12 @@ lanCounit :: Lan g g a -> a
 lanCounit (Lan f ga) = f ga
 {-# INLINE lanCounit #-}
 
--- | Lift a monadic action into 'Codensity' for CPS fusion.
+-- | Lift a monadic action into 't:Codensity' for CPS fusion.
 liftCodensity :: Monad m => m a -> Codensity m a
 liftCodensity m = Codensity (m >>=)
 {-# INLINE liftCodensity #-}
 
--- | Lower 'Density' back into the underlying comonad.
+-- | Lower 't:Density' back into the underlying comonad.
 lowerDensity :: Comonad w => Density w a -> w a
 lowerDensity (Density f wb) = extend f wb
 {-# INLINE lowerDensity #-}
@@ -163,28 +163,28 @@ data PLanU
 -- | Tag for Lan Counit: collapses @Lan g g inner -> inner@.
 data PLanC
 
--- | Tag for lifting arguments into 'Coyoneda'.
+-- | Tag for lifting arguments into 't:Coyoneda'.
 data PCoY
 
--- | Tag for lowering 'Coyoneda' via single 'fmap'.
+-- | Tag for lowering 't:Coyoneda' via single 'fmap'.
 data PUnCoY
 
--- | Tag for lifting arguments into 'Yoneda'.
+-- | Tag for lifting arguments into 't:Yoneda'.
 data PYon
 
--- | Tag for lowering 'Yoneda' into the underlying functor.
+-- | Tag for lowering 't:Yoneda' into the underlying functor.
 data PUnYon
 
--- | Tag for lifting monadic arguments into 'Codensity'.
+-- | Tag for lifting monadic arguments into 't:Codensity'.
 data PCodM
 
--- | Tag for lowering 'Codensity' back to the underlying monad.
+-- | Tag for lowering 't:Codensity' back to the underlying monad.
 data PUnCod
 
--- | Tag for lifting comonadic arguments into 'Density'.
+-- | Tag for lifting comonadic arguments into 't:Density'.
 data PDenW
 
--- | Tag for lowering 'Density' back to the underlying comonad.
+-- | Tag for lowering 't:Density' back to the underlying comonad.
 data PUnDen
 
 -- | In-order Ran Counit alias.
@@ -267,7 +267,7 @@ instance forall base active ms m t3 acc acc' out g inner.
       (mapPath @(Init active) @(Lan g g inner) @inner lanCounit acc)
   {-# INLINE stepRole #-}
 
--- | Coyoneda lifting: wraps argument in 'Coyoneda' with zero constraints.
+-- | Coyoneda lifting: wraps argument in 't:Coyoneda' with zero constraints.
 instance (ExpectArrow "StepRole PCoY" acc (Coyoneda φ a) rTail, fa ~ φ a, StepPathMask base '[] ms m t3 rTail out')
   => StepRole PCoY base '[] ms m t3 acc (fa -> out') where
   stepRole f acc fa = stepPathMask @base @'[] @ms f (acc (liftCoyoneda fa))
@@ -283,7 +283,7 @@ instance forall base l ls ms m t3 acc acc' out' φ a rTail fa.
       (mapPath @(l ': ls) @(Coyoneda φ a -> rTail) @rTail (\g -> g (liftCoyoneda fa)) acc)
   {-# INLINE stepRole #-}
 
--- | Coyoneda lowering: unrolls 'Coyoneda' to underlying functor via single 'fmap'.
+-- | Coyoneda lowering: unrolls 't:Coyoneda' to underlying functor via single 'fmap'.
 instance forall base active ms m t3 acc acc' out φ inner.
   ( Functor φ
   , MapPath (Init active) (Coyoneda φ inner) (φ inner) acc acc'
@@ -294,7 +294,7 @@ instance forall base active ms m t3 acc acc' out φ inner.
       (mapPath @(Init active) @(Coyoneda φ inner) @(φ inner) lowerCoyoneda acc)
   {-# INLINE stepRole #-}
 
--- | Yoneda lifting: wraps argument in 'Yoneda' for $O(1)$ composition.
+-- | Yoneda lifting: wraps argument in 't:Yoneda' for $O(1)$ composition.
 instance (Functor φ, ExpectArrow "StepRole PYon" acc (Yoneda φ a) rTail, fa ~ φ a, StepPathMask base '[] ms m t3 rTail out')
   => StepRole PYon base '[] ms m t3 acc (fa -> out') where
   stepRole f acc fa = stepPathMask @base @'[] @ms f (acc (liftYoneda fa))
@@ -310,7 +310,7 @@ instance forall base l ls ms m t3 acc acc' out' φ a rTail fa.
       (mapPath @(l ': ls) @(Yoneda φ a -> rTail) @rTail (\g -> g (liftYoneda fa)) acc)
   {-# INLINE stepRole #-}
 
--- | Yoneda lowering: extracts underlying functor from 'Yoneda' (zero constraints).
+-- | Yoneda lowering: extracts underlying functor from 't:Yoneda' (zero constraints).
 instance forall base active ms m t3 acc acc' out φ inner.
   ( MapPath (Init active) (Yoneda φ inner) (φ inner) acc acc'
   , StepPathMask base active ms m t3 acc' out
@@ -320,7 +320,7 @@ instance forall base active ms m t3 acc acc' out φ inner.
       (mapPath @(Init active) @(Yoneda φ inner) @(φ inner) lowerYoneda acc)
   {-# INLINE stepRole #-}
 
--- | Codensity lifting: lifts monadic argument into 'Codensity' for CPS fusion.
+-- | Codensity lifting: lifts monadic argument into 't:Codensity' for CPS fusion.
 instance (Monad m', ExpectArrow "StepRole PCodM" acc (Codensity m' a) rTail, ma ~ m' a, StepPathMask base '[] ms m t3 rTail out')
   => StepRole PCodM base '[] ms m t3 acc (ma -> out') where
   stepRole f acc ma = stepPathMask @base @'[] @ms f (acc (liftCodensity ma))
@@ -336,7 +336,7 @@ instance forall base l ls ms m t3 acc acc' out' m' a rTail ma.
       (mapPath @(l ': ls) @(Codensity m' a -> rTail) @rTail (\g -> g (liftCodensity ma)) acc)
   {-# INLINE stepRole #-}
 
--- | Codensity lowering: runs 'Codensity' back to underlying monad.
+-- | Codensity lowering: runs 't:Codensity' back to underlying monad.
 instance forall base active ms m t3 acc acc' out m' inner.
   ( Applicative m'
   , MapPath (Init active) (Codensity m' inner) (m' inner) acc acc'
@@ -347,7 +347,7 @@ instance forall base active ms m t3 acc acc' out m' inner.
       (mapPath @(Init active) @(Codensity m' inner) @(m' inner) lowerCodensity acc)
   {-# INLINE stepRole #-}
 
--- | Density lifting: lifts comonadic argument into 'Density'.
+-- | Density lifting: lifts comonadic argument into 't:Density'.
 instance (Comonad w, ExpectArrow "StepRole PDenW" acc (Density w a) rTail, wa ~ w a, StepPathMask base '[] ms m t3 rTail out')
   => StepRole PDenW base '[] ms m t3 acc (wa -> out') where
   stepRole f acc wa = stepPathMask @base @'[] @ms f (acc (liftDensity wa))
@@ -363,7 +363,7 @@ instance forall base l ls ms m t3 acc acc' out' w a rTail wa.
       (mapPath @(l ': ls) @(Density w a -> rTail) @rTail (\g -> g (liftDensity wa)) acc)
   {-# INLINE stepRole #-}
 
--- | Density lowering: runs 'Density' back to underlying comonad.
+-- | Density lowering: runs 't:Density' back to underlying comonad.
 instance forall base active ms m t3 acc acc' out w inner.
   ( Comonad w
   , MapPath (Init active) (Density w inner) (w inner) acc acc'

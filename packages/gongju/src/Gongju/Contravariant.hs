@@ -23,7 +23,7 @@
 -- * Positional curried pre-composition ('PrecomposeAt', 'precomposeAt @n', '(-.)', '(-.*)', '(-.**)', '(-.***)').
 -- * 2D function splicing grid ('SpliceAt', 'spliceAt @n @m').
 -- * Alternating parity contravariant functor mapping ('ContramapN', 'contramapN @n', '(<-$>)', '(<-$$>)', '(<-$$$>)').
--- * Canonical re-exports of 'Contravariant', 'Divisible', and 'Decidable' from 'base'.
+-- * Canonical re-exports of 'Contravariant', 'Divisible', and 'Decidable' from @base@.
 module Gongju.Contravariant
   ( -- * Positional Pre-Composition
     PrecomposeAt (..)

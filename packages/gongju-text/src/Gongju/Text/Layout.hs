@@ -29,7 +29,7 @@ data Block = Block
     , subBlocks   :: ![Block]
     } deriving stock (Show, Eq)
 
--- | Convert raw lines into 'IndentedLine' records counting space depth.
+-- | Convert raw lines into 't:IndentedLine' records counting space depth.
 parseIndentedLines :: [T.Text] -> [IndentedLine]
 parseIndentedLines = map parseLine
   where

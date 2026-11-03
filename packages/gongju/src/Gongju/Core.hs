@@ -1,7 +1,7 @@
 -- | Module: Gongju.Core
 -- Description: Core re-exports and introductory guide for Gongju
 --
--- 'Gongju' (공구 / 工具, tools/implement) is a pure type-level Haskell utility suite
+-- @Gongju@ (공구 / 工具, tools/implement) is a pure type-level Haskell utility suite
 -- replacing Template Haskell splices (like 'composition-extra') and finite tuple
 -- generics (like 'tuple-sop') with an open-world tag-driven tape engine, Peano
 -- induction, bidirectional functional dependencies, and arbitrary curried argument
