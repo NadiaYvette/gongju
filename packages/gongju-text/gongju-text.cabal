@@ -9,8 +9,14 @@ license:            EUPL-1.2 OR Apache-2.0
 license-files:      LICENSE
 author:             Nadia Yvette Chambers
 maintainer:         nadia.yvette.chambers@ik.me
+homepage:           https://github.com/NadiaYvette/gongju
+bug-reports:        https://github.com/NadiaYvette/gongju/issues
 category:           Text, Parsing, Utilities
 build-type:         Simple
+extra-doc-files:
+    README.md
+  , CHANGELOG.md
+  , LICENSE
 
 tested-with:
     GHC == 9.6.7
@@ -18,6 +24,11 @@ tested-with:
   , GHC == 9.10.3
   , GHC == 9.12.4
   , GHC == 9.14.1
+
+source-repository head
+    type:     git
+    location: https://github.com/NadiaYvette/gongju.git
+    subdir:   packages/gongju-text
 
 common commons
     default-language:   Haskell2010
