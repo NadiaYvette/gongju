@@ -113,5 +113,14 @@ Historically, Haskell developers seeking multi-argument function manipulation fa
 - **Note [Zero-Cost Inlining and Core Simplification]** (`Gongju.Core`):  
   [ref:note-zero-cost-core-simplification]  
   Formalizes compiler inlining invariants, compile-time Peano reduction, and dictionary elimination verifying zero runtime overhead via automated GHC Core inspection.
+- **Note [Gongju Combinator Taxonomy]** (`Gongju.Diagonal`):  
+  [ref:note-gongju-combinators]  
+  Distributing unary or effectful functions across multi-argument curried functions or data constructors via Peano induction.
+- **Note [Evacuability Polymorphism]** (`Gongju.Evacuate`):  
+  [ref:note-evacuability-polymorphism]  
+  Unifies bounded-non-empty collections with standard evacuable collections over a shared carrier.
+- **Note [Spine Traversal]** (`Gongju.Spine`):  
+  [ref:note-spine-traversal]  
+  Arbitrary-depth spine traversal performing depth-indexed interleaved monadic binding and traversable distribution.
 
 

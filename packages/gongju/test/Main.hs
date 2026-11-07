@@ -25,7 +25,7 @@ module Main (main) where
 
 import Test.Hspec
 import Data.Functor.Identity (Identity (..))
-import Gongju.Core
+import Gongju
 import CoreInspection
 
 -- | Minimal Comonad fixture for verifying cokleisli extension via 'W'.
@@ -78,7 +78,7 @@ instance IxMonad IxState where
     in runIxState (k a) j
 
 main :: IO ()
-main = hspec do
+main = hspec $ parallel do
   -- Tested against Note [Peano TypeLits Bridge] [ref:note-peano-typelits-bridge]
   describe "Gongju.Peano Naturals & List Type Families" do
     it "converts numeric TypeLits to Peano and verifies term equality" do
@@ -514,6 +514,42 @@ main = hspec do
       testYankCat1 (-) 5 20 `shouldBe` 15
       testPermuteCat3 f3 3 1 2 `shouldBe` 123
       testPermuteHandler3 f4 3 1 2 4 `shouldBe` 1234
+
+  describe "Gongju.Diagonal Arity Distribution and Variadic Zipping" do
+    it "onN distributes unary function across curried arguments" do
+      onN @2 (* 10) (,) (3 :: Int) (4 :: Int) `shouldBe` (30, 40)
+      onN @3 show (,,) (1 :: Int) (2 :: Int) (3 :: Int) `shouldBe` ("1", "2", "3")
+
+    it "diagN collapses curried function along the diagonal" do
+      diagN @2 id (+) (5 :: Int) `shouldBe` 10
+      diagN @3 id (,,) ("sky" :: String) `shouldBe` ("sky", "sky", "sky")
+
+    it "zipWithN variadically zips arbitrary ZipContainers" do
+      zipWithN @3 (,,) ([1, 2] :: [Int]) (['a', 'b'] :: [Char]) ([True, False] :: [Bool]) `shouldBe` ([(1, 'a', True), (2, 'b', False)] :: [(Int, Char, Bool)])
+
+  describe "Gongju.Evacuate Carrier Polymorphism" do
+    it "converts to and from evacuable carriers" do
+      toEvac ([1, 2, 3] :: [Int]) `shouldBe` [1, 2, 3]
+      fromEvac ([1, 2] :: [Int]) `shouldBe` (Just [1, 2] :: Maybe [Int])
+
+    it "sifts evacuable containers with boolean predicate" do
+      sift even ([1, 2, 3, 4] :: [Int]) `shouldBe` (Just [2, 4] :: Maybe [Int])
+      mapMaybeEvac (\x -> if even x then Just (show x) else Nothing) ([1, 2, 3, 4] :: [Int]) `shouldBe` (Just ["2", "4"] :: Maybe [String])
+
+  describe "Gongju.Spine Arbitrary-Depth Monad + Traversable Traversal" do
+    it "spineFor traverses nested layers and applies pure morphism" do
+      spineFor @2 (Just [1 :: Int, 2, 3]) (pure . (* 2)) `shouldBe` (Just [2, 4, 6] :: Maybe [Int])
+
+    it "spineWither contracts and withers nested spine layers" do
+      spineWither @1 (Just [Just (1 :: Int), Nothing, Just 3]) pure `shouldBe` (Just [1, 3] :: Maybe [Int])
+
+  describe "Gongju.Tuple Flat Tuple Combinators" do
+    it "curryFlat and uncurryFlat bridge tuples and curried functions" do
+      curryFlat (\(x, y, z) -> x + y + z) (1 :: Int) (2 :: Int) (3 :: Int) `shouldBe` 6
+      uncurryFlat (\x y z -> x + y + z) (1 :: Int, 2 :: Int, 3 :: Int) `shouldBe` 6
+
+    it "mapTupleHom maps homogeneous tuples" do
+      mapTupleHom (* 10) (1 :: Int, 2 :: Int, 3 :: Int) `shouldBe` (10, 20, 30)
 
 
 
