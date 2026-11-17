@@ -12,7 +12,7 @@ SPDX-License-Identifier: EUPL-1.2 OR Apache-2.0
 
 ## 1. Commit Message Structure
 
-Every commit in `gachi` must follow the imperative-subject plus explanatory HEREDOC body structure:
+Every commit in `gongju` must follow the imperative-subject plus explanatory HEREDOC body structure:
 
 ```gitcommit
 Short (<=72 chars) imperative subject line describing the change

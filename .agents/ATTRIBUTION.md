@@ -1,6 +1,6 @@
 # AI Coding Assistant Attribution Configuration
 
-This configuration specifies the commit attribution schema for AI coding assistants and orchestration engines operating in `gachi`, adopting the convention established in `sarutahiko`.
+This configuration specifies the commit attribution schema for AI coding assistants and orchestration engines operating in `gongju`, adopting the convention established in `sarutahiko`.
 
 ## 1. Commit Trailers
 

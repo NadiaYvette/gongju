@@ -19,7 +19,7 @@ Raw `cabal build` output dumps thousands of tokens into prompt history on every 
    - Returns structured JSON error counts, file paths, and exact diagnostic messages without noise.
 2. **Test Suite Verification:**
    - Run `cabal test all` to verify all test suites:
-     - `gachi-core:test:tests` (tests for skeletal insertion, monotonic IDs, unboxed segment appending, capacity growth, and bounds checks).
+     - `gongju:test:gongju-test` (type-level Peano indexing, tuple permutations, functional dependency resolution).
 
 ---
 
