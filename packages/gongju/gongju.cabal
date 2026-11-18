@@ -1,6 +1,6 @@
 cabal-version:      3.0
 name:               gongju
-version:            0.1.0.0
+version:            0.1.1.0
 synopsis:           Pure type-level utility functions, arity composition, and curried combinators
 description:
     Gongju (공구 / 工具, tools/implement) provides inductive Peano type-level

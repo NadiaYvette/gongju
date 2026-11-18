@@ -1,6 +1,6 @@
 cabal-version:      3.0
 name:               gongju-text
-version:            0.1.0.0
+version:            0.1.1.0
 synopsis:           Structured text utilities, non-empty text collections, and layout parsing
 description:
     Gongju-Text provides robust text processing utilities leveraging non-empty
